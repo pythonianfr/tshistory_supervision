@@ -151,10 +151,15 @@ class TimeSerie(BaseTS):
     # we still need a full-blown history reconstruction routine
     # for arbitrary revision_dates
 
-    def _build_snapshots_upto(self, cnx, table, qfilter):
-        snapid, synthsnap = self._find_snapshot(cnx, table, qfilter)
+    def _build_snapshots_upto(self, cnx, table, qfilter,
+                              from_value_date=None, to_value_date=None):
+        snapid, synthsnap = self._find_snapshot(cnx, table, qfilter,
+                                                from_value_date=from_value_date,
+                                                to_value_date=to_value_date)
         auto_snapid, autosnap = self._find_snapshot(cnx, table, qfilter,
-                                                    column='autosnapshot')
+                                                    column='autosnapshot',
+                                                    from_value_date=from_value_date,
+                                                    to_value_date=to_value_date)
         if snapid is None:
             return None, None  # yes, we can be asked fancy revision dates
 
@@ -200,11 +205,14 @@ class TimeSerie(BaseTS):
         manual_ts = self._compute_diff(auto_ts, synth_ts)
         return auto_ts, manual_ts
 
-    def _onthefly(self, cnx, table, revision_date):
+    def _onthefly(self, cnx, table, revision_date,
+                  from_value_date=None, to_value_date=None):
         qfilter = []
         if revision_date:
             qfilter.append(lambda cset, _: cset.c.insertion_date <= revision_date)
-        return self._build_snapshots_upto(cnx, table, qfilter)
+        return self._build_snapshots_upto(cnx, table, qfilter,
+                                          from_value_date=from_value_date,
+                                          to_value_date=to_value_date)
 
     # public API redefinition
 
@@ -257,12 +265,15 @@ class TimeSerie(BaseTS):
 
     # supervision specific API
 
-    def get_ts_marker(self, cnx, name, revision_date=None):
+    def get_ts_marker(self, cnx, name, revision_date=None,
+                      from_value_date=None, to_value_date=None):
         table = self._get_ts_table(cnx, name)
         if table is None:
             return None, None
 
-        auto, manual = self._onthefly(cnx, table, revision_date)
+        auto, manual = self._onthefly(cnx, table, revision_date,
+                                      from_value_date=from_value_date,
+                                      to_value_date=to_value_date)
         unionindex = join_index(auto, manual)
         if unionindex is None:
             # this means both series are empty
