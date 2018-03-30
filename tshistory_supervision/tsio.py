@@ -62,14 +62,14 @@ class TimeSerie(BaseTS):
     _saveme = None
     _snapshot_interval = 100
 
-    def insert(self, cnx, ts, name, author=None, extra_scalars={}):
-        initial_insertion = not self.exists(cnx, name)
+    def insert(self, cn, ts, name, author=None, extra_scalars={}):
+        initial_insertion = not self.exists(cn, name)
         if initial_insertion and not extra_scalars.get('manual', False):
             if ts.isnull().all():
                 return None
             ts = ts[~ts.isnull()]
             self._saveme = {'autosnapshot': ts}
-        diff = super(TimeSerie, self).insert(cnx, ts, name, author=author,
+        diff = super(TimeSerie, self).insert(cn, ts, name, author=author,
                                              extra_scalars=extra_scalars)
 
         return diff
@@ -109,28 +109,28 @@ class TimeSerie(BaseTS):
             )
             self._saveme = None
 
-    def _latest_item(self, cnx, table, column):
+    def _latest_item(self, cn, table, column):
         # fetch the top-level things (e.g. snapshot, autosnapshot)
         sql = select([table.c[column]]
         ).order_by(desc(table.c.id)
         ).limit(1)
-        return cnx.execute(sql).scalar()
+        return cn.execute(sql).scalar()
 
-    def _purge_snapshot_at(self, cnx, table, diffid):
-        cnx.execute(
+    def _purge_snapshot_at(self, cn, table, diffid):
+        cn.execute(
             table.update(
             ).where(table.c.id == diffid
             ).values(snapshot=None, autosnapshot=None)
         )
 
-    def _compute_diff_and_newsnapshot(self, cnx, table, newts, manual=False):
-        auto = self._latest_item(cnx, table, 'autosnapshot')
+    def _compute_diff_and_newsnapshot(self, cn, table, newts, manual=False):
+        auto = self._latest_item(cn, table, 'autosnapshot')
         if auto is None:
-            auto = self._build_snapshot_upto(cnx, table,
+            auto = self._build_snapshot_upto(cn, table,
                                              [lambda _, table: table.c.manual == False])
         else:
             auto = self._deserialize(auto, table.name)
-        synthetic = self._build_snapshot_upto(cnx, table)
+        synthetic = self._build_snapshot_upto(cn, table)
 
         self._validate_type(auto, newts, table.name)
         self._validate_type(synthetic, newts, table.name)
@@ -151,12 +151,12 @@ class TimeSerie(BaseTS):
     # we still need a full-blown history reconstruction routine
     # for arbitrary revision_dates
 
-    def _build_snapshots_upto(self, cnx, table, qfilter,
+    def _build_snapshots_upto(self, cn, table, qfilter,
                               from_value_date=None, to_value_date=None):
-        snapid, synthsnap = self._find_snapshot(cnx, table, qfilter,
+        snapid, synthsnap = self._find_snapshot(cn, table, qfilter,
                                                 from_value_date=from_value_date,
                                                 to_value_date=to_value_date)
-        auto_snapid, autosnap = self._find_snapshot(cnx, table, qfilter,
+        auto_snapid, autosnap = self._find_snapshot(cn, table, qfilter,
                                                     column='autosnapshot',
                                                     from_value_date=from_value_date,
                                                     to_value_date=to_value_date)
@@ -179,7 +179,7 @@ class TimeSerie(BaseTS):
         for filtercb in qfilter:
             sql = sql.where(filtercb(cset, table))
 
-        alldiffs = pd.read_sql(sql, cnx)
+        alldiffs = pd.read_sql(sql, cn)
 
         if len(alldiffs) == 0:
             manual_ts = self._compute_diff(autosnap, synthsnap)
@@ -205,30 +205,30 @@ class TimeSerie(BaseTS):
         manual_ts = self._compute_diff(auto_ts, synth_ts)
         return auto_ts, manual_ts
 
-    def _onthefly(self, cnx, table, revision_date,
+    def _onthefly(self, cn, table, revision_date,
                   from_value_date=None, to_value_date=None):
         qfilter = []
         if revision_date:
             qfilter.append(lambda cset, _: cset.c.insertion_date <= revision_date)
-        return self._build_snapshots_upto(cnx, table, qfilter,
+        return self._build_snapshots_upto(cn, table, qfilter,
                                           from_value_date=from_value_date,
                                           to_value_date=to_value_date)
 
     # public API redefinition
 
-    def get(self, cnx, name, revision_date=None):
-        table = self._get_ts_table(cnx, name)
+    def get(self, cn, name, revision_date=None):
+        table = self._get_ts_table(cn, name)
         if table is None:
             return
 
         if revision_date:
-            auto, residualmanual = self._onthefly(cnx, table, revision_date)
+            auto, residualmanual = self._onthefly(cn, table, revision_date)
             ts = self._apply_diff(auto, residualmanual)
         else:
             # fetch the top-level snapshot
-            synthetic = self._latest_item(cnx, table, 'snapshot')
+            synthetic = self._latest_item(cn, table, 'snapshot')
             if synthetic is None: # head just got chopped
-                ts = self._build_snapshot_upto(cnx, table)
+                ts = self._build_snapshot_upto(cn, table)
             else:
                 ts = self._deserialize(synthetic, name)
 
@@ -265,13 +265,13 @@ class TimeSerie(BaseTS):
 
     # supervision specific API
 
-    def get_ts_marker(self, cnx, name, revision_date=None,
+    def get_ts_marker(self, cn, name, revision_date=None,
                       from_value_date=None, to_value_date=None):
-        table = self._get_ts_table(cnx, name)
+        table = self._get_ts_table(cn, name)
         if table is None:
             return None, None
 
-        auto, manual = self._onthefly(cnx, table, revision_date,
+        auto, manual = self._onthefly(cn, table, revision_date,
                                       from_value_date=from_value_date,
                                       to_value_date=to_value_date)
         unionindex = join_index(auto, manual)
