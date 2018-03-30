@@ -2,8 +2,6 @@ from pathlib import Path
 from datetime import datetime
 import pytest
 
-from mock import patch
-
 import pandas as pd
 import numpy as np
 
@@ -180,7 +178,8 @@ def test_manual_overrides(engine, tsh):
     # edit the bogus upstream data: -1 -> 3
     # also edit the next value
     ts_manual = genserie(datetime(2010, 1, 4), 'D', 2, [3])
-    tsh.insert(engine, ts_manual, 'ts_mixte', 'test', dict(manual=True))
+    tsh.insert(engine, ts_manual, 'ts_mixte', 'test',
+               extra_scalars=dict(manual=True))
     tsh.get_ts_marker(engine, 'ts_mixte')
 
     assert_df("""
@@ -236,7 +235,8 @@ def test_manual_overrides(engine, tsh):
 
     # another iterleaved editing session
     ts_edit = genserie(datetime(2010, 1, 4), 'D', 1, [2])
-    tsh.insert(engine, ts_edit, 'ts_mixte', 'test', dict(manual=True))
+    tsh.insert(engine, ts_edit, 'ts_mixte', 'test',
+               extra_scalars=dict(manual=True))
     assert 2 == tsh.get(engine, 'ts_mixte')['2010-01-04']  # still
     ts, marker = tsh.get_ts_marker(engine, 'ts_mixte')
 
@@ -253,7 +253,8 @@ def test_manual_overrides(engine, tsh):
     # another iterleaved editing session
     drange = pd.date_range(start=datetime(2010, 1, 4), periods=1)
     ts_edit = pd.Series([4], index=drange)
-    tsh.insert(engine, ts_edit, 'ts_mixte', 'test', dict(manual=True))
+    tsh.insert(engine, ts_edit, 'ts_mixte', 'test',
+               extra_scalars=dict(manual=True))
     assert 4 == tsh.get(engine, 'ts_mixte')['2010-01-04']  # still
 
     ts_auto_resend_the_same = pd.Series([2], index=drange)
@@ -281,10 +282,12 @@ def test_manual_overrides(engine, tsh):
 """, ts_auto)
 
     ts_manual = genserie(datetime(2010, 1, 5), 'D', 2, [3])
-    tsh.insert(engine, ts_manual, 'ts_mixte', 'test', dict(manual=True))
+    tsh.insert(engine, ts_manual, 'ts_mixte', 'test',
+               extra_scalars=dict(manual=True))
 
     ts_manual = genserie(datetime(2010, 1, 9), 'D', 1, [3])
-    tsh.insert(engine, ts_manual, 'ts_mixte', 'test', dict(manual=True))
+    tsh.insert(engine, ts_manual, 'ts_mixte', 'test',
+               extra_scalars=dict(manual=True))
     tsh.insert(engine, ts_auto, 'ts_mixte', 'test')
 
     upstream_fix = pd.Series([2.5], index=[datetime(2010, 1, 5)])
@@ -317,7 +320,8 @@ def test_manual_overrides(engine, tsh):
 
     # just another override for the fun
     ts_manual.iloc[0] = 4
-    tsh.insert(engine, ts_manual, 'ts_mixte', 'test', dict(manual=True))
+    tsh.insert(engine, ts_manual, 'ts_mixte', 'test',
+               extra_scalars=dict(manual=True))
     assert_df("""
 2010-01-01    2.0
 2010-01-02    2.0
@@ -332,7 +336,8 @@ def test_manual_overrides(engine, tsh):
 
 def test_first_manual(engine, tsh):
     ts_begin = genserie(datetime(2010, 1, 1), 'D', 10)
-    tsh.insert(engine, ts_begin, 'ts_only', 'test', dict(manual=True))
+    tsh.insert(engine, ts_begin, 'ts_only', 'test',
+               extra_scalars=dict(manual=True))
 
     assert_df("""
 2010-01-01    0.0
@@ -348,7 +353,8 @@ def test_first_manual(engine, tsh):
 """, tsh.get(engine, 'ts_only'))
 
     # we should detect the emission of a message
-    tsh.insert(engine, ts_begin, 'ts_only', 'test', dict(manual=True))
+    tsh.insert(engine, ts_begin, 'ts_only', 'test',
+               extra_scalars=dict(manual=True))
 
     assert_df("""
 2010-01-01    0.0
@@ -370,7 +376,8 @@ def test_first_manual(engine, tsh):
     tsh.get(engine, 'ts_only').to_string().strip()
 
     # should be a noop
-    tsh.insert(engine, ts_slight_variation, 'ts_only', 'test', dict(manual=True))
+    tsh.insert(engine, ts_slight_variation, 'ts_only', 'test',
+               extra_scalars=dict(manual=True))
     _, marker = tsh.get_ts_marker(engine, 'ts_only')
 
     assert_df("""
@@ -407,7 +414,8 @@ def test_more_manual(engine, tsh):
     ts_man = genserie(datetime(2015, 1, 3), 'D', 3, -1)
     ts_man.iloc[-1] = np.nan
     # erasing of the laste value for the date 5/1/2015
-    tsh.insert(engine, ts_man, 'ts_exp1', 'test', {'manual': True})
+    tsh.insert(engine, ts_man, 'ts_exp1', 'test',
+               extra_scalars={'manual': True})
 
     ts_get = tsh.get(engine, 'ts_exp1')
 
@@ -428,23 +436,17 @@ def test_more_manual(engine, tsh):
 
 
 def test_revision_date(engine, tsh):
-    with patch('tshistory.tsio.datetime') as mock_date:
-        mock_date.now.return_value = datetime(2015, 1, 1, 15, 43, 23)
+    ts = genserie(datetime(2010, 1, 4), 'D', 4, [1], name='truc')
+    tsh.insert(engine, ts, 'ts_through_time', 'test',
+               _insertion_date=datetime(2015, 1, 1, 15, 43, 23))
 
-        ts = genserie(datetime(2010, 1, 4), 'D', 4, [1], name='truc')
-        tsh.insert(engine, ts, 'ts_through_time', 'test')
+    ts = genserie(datetime(2010, 1, 4), 'D', 4, [2], name='truc')
+    tsh.insert(engine, ts, 'ts_through_time', 'test',
+               _insertion_date=datetime(2015, 1, 2, 15, 43, 23))
 
-    with patch('tshistory.tsio.datetime') as mock_date:
-        mock_date.now.return_value = datetime(2015, 1, 2, 15, 43, 23)
-
-        ts = genserie(datetime(2010, 1, 4), 'D', 4, [2], name='truc')
-        tsh.insert(engine, ts, 'ts_through_time', 'test')
-
-    with patch('tshistory.tsio.datetime') as mock_date:
-        mock_date.now.return_value = datetime(2015, 1, 3, 15, 43, 23)
-
-        ts = genserie(datetime(2010, 1, 4), 'D', 4, [3], name='truc')
-        tsh.insert(engine, ts, 'ts_through_time', 'test')
+    ts = genserie(datetime(2010, 1, 4), 'D', 4, [3], name='truc')
+    tsh.insert(engine, ts, 'ts_through_time', 'test',
+               _insertion_date=datetime(2015, 1, 3, 15, 43, 23))
 
     ts = tsh.get(engine, 'ts_through_time')
 

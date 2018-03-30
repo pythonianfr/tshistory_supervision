@@ -62,7 +62,9 @@ class TimeSerie(BaseTS):
     _saveme = None
     _snapshot_interval = 100
 
-    def insert(self, cn, ts, name, author=None, extra_scalars={}):
+    def insert(self, cn, ts, name, author=None,
+               _insertion_date=None,
+               extra_scalars={}):
         initial_insertion = not self.exists(cn, name)
         if initial_insertion and not extra_scalars.get('manual', False):
             if ts.isnull().all():
@@ -70,6 +72,7 @@ class TimeSerie(BaseTS):
             ts = ts[~ts.isnull()]
             self._saveme = {'autosnapshot': ts}
         diff = super(TimeSerie, self).insert(cn, ts, name, author=author,
+                                             _insertion_date=_insertion_date,
                                              extra_scalars=extra_scalars)
 
         return diff
