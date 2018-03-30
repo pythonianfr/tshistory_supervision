@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, MetaData
 
 from pytest_sa_pg import db
 
-from tshistory.schema import init, reset
+from tshistory.schema import init, reset, delete_schema
 from tshistory_supervision.tsio import TimeSerie
 
 DATADIR = Path(__file__).parent / 'test' / 'data'
@@ -20,8 +20,10 @@ def engine(request):
     meta = MetaData()
     with e.connect() as cn:
         reset(cn)
+    delete_schema(e, 'automatic')
     with e.connect() as cn:
         init(cn, meta)
+        init(cn, meta, 'automatic')
     yield e
 
 
