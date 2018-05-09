@@ -20,12 +20,12 @@ def engine(request):
     meta = MetaData()
     with e.connect() as cn:
         reset(cn)
-    delete_schema(e, 'automatic')
-    delete_schema(e, 'manual')
+    delete_schema(e, 'tsh-automatic')
+    delete_schema(e, 'tsh-manual')
     with e.connect() as cn:
         init(cn, meta)
-        init(cn, meta, 'automatic')
-        init(cn, meta, 'manual')
+        init(cn, meta, 'tsh-automatic')
+        init(cn, meta, 'tsh-manual')
     yield e
 
 

@@ -415,7 +415,7 @@ def test_more_manual(engine, tsh):
 2015-01-05     True
 """, marker)
 
-    tshm = TimeSerie('manual')
+    tshm = TimeSerie('tsh-manual')
     man = tshm.get(engine, 'ts_exp1', _keep_nans=True)
     assert_df("""
 2015-01-03   -3.0
