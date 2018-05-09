@@ -5,6 +5,8 @@ import pytest
 import pandas as pd
 import numpy as np
 
+from tshistory_supervision.tsio import TimeSerie
+
 
 DATADIR = Path(__file__).parent / 'data'
 
@@ -412,6 +414,14 @@ def test_more_manual(engine, tsh):
 2015-01-04     True
 2015-01-05     True
 """, marker)
+
+    tshm = TimeSerie('manual')
+    man = tshm.get(engine, 'ts_exp1', _keep_nans=True)
+    assert_df("""
+2015-01-03   -3.0
+2015-01-04   -3.0
+2015-01-05    NaN
+""", man)
 
 
 def test_before_first_insertion(engine, tsh):

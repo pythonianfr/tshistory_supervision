@@ -21,9 +21,11 @@ def engine(request):
     with e.connect() as cn:
         reset(cn)
     delete_schema(e, 'automatic')
+    delete_schema(e, 'manual')
     with e.connect() as cn:
         init(cn, meta)
         init(cn, meta, 'automatic')
+        init(cn, meta, 'manual')
     yield e
 
 

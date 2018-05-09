@@ -54,19 +54,25 @@ class TimeSerie(BaseTS):
 
     def insert(self, cn, ts, name, author, _insertion_date=None, manual=False):
         if manual:
+            basetsh = BaseTS(namespace='manual')
             # insert & compute diff over synthetic
-            return super().insert(
+            diff = basetsh.insert(
                 cn, ts, name, author, _insertion_date=_insertion_date
             )
 
-        # insert into synthetic & compute diff over automatic
-        basetsh = BaseTS(namespace='automatic')
-        diff = basetsh.insert(
-            cn, ts, name, author,
-            _insertion_date=_insertion_date
-        )
-        if diff is None:
-            return
+            if diff is None:
+                return
+            diff = ts
+
+        else:
+            # insert into synthetic & compute diff over automatic
+            basetsh = BaseTS(namespace='automatic')
+            diff = basetsh.insert(
+                cn, ts, name, author,
+                _insertion_date=_insertion_date
+            )
+            if diff is None:
+                return
 
         # insert the diff over automatic into synthetic
         a = super().insert(
