@@ -39,7 +39,7 @@ class TimeSerie(BaseTS):
       value.
 
     We can explain the workflow like with a traditional DVCS graph,
-    with two branches: "automatic" and "synthetic".
+    with three branches: "automatic", "manual" and "synthetic".
 
     All automatic fetches go into the automatic branch (and thus are
     diffed against each other).
@@ -49,7 +49,8 @@ class TimeSerie(BaseTS):
     all the manual entries.
 
     The manual editions can be computed as a diff between synthetic
-    and automatic series.
+    and automatic series, but for convenience we also store them
+    explicitly.
     """
 
     def insert(self, cn, ts, name, author, _insertion_date=None, manual=False):
@@ -65,7 +66,7 @@ class TimeSerie(BaseTS):
             diff = ts
 
         else:
-            # insert into synthetic & compute diff over automatic
+            # insert & compute diff over automatic
             basetsh = BaseTS(namespace='{}-automatic'.format(self.namespace))
             diff = basetsh.insert(
                 cn, ts, name, author,
@@ -74,7 +75,7 @@ class TimeSerie(BaseTS):
             if diff is None:
                 return
 
-        # insert the diff over automatic into synthetic
+        # insert the diff over automatic or the manual edit into synthetic
         a = super().insert(
             cn, diff, name, author,
             _insertion_date=_insertion_date
