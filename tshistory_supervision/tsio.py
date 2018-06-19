@@ -108,7 +108,7 @@ class TimeSerie(BaseTS):
             # this means both series are empty
             return None, None
 
-        mask_manual = pd.Series([False], index=unionindex)
+        mask_manual = pd.Series([False] * len(unionindex), index=unionindex)
         if manual is not None:
             mask_manual[manual.index] = True
             mask_manual.name = name
