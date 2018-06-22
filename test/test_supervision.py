@@ -39,13 +39,13 @@ def test_mercure_serie(engine, tsh):
     assert 3 == len(s)
 
     assert_df("""
-   id name        table_name
-0   1   42  tsh.timeserie.42
-""", pd.read_sql('select id, name, table_name from tsh.registry', engine))
+   id seriename table_name
+0   1        42         42
+""", pd.read_sql('select id, seriename, table_name from tsh.registry', engine))
 
     assert_df("""
-   cset serie
-0     1    42
+   cset  serie
+0     1      1
 """, pd.read_sql('select * from tsh.changeset_series', engine))
 
 
