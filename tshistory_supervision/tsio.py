@@ -53,11 +53,15 @@ class TimeSerie(BaseTS):
     explicitly.
     """
 
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.manual_store = BaseTS(namespace='{}-manual'.format(self.namespace))
+        self.auto_store = BaseTS(namespace='{}-automatic'.format(self.namespace))
+
     def insert(self, cn, ts, name, author, _insertion_date=None, manual=False):
         if manual:
-            basetsh = BaseTS(namespace='{}-manual'.format(self.namespace))
             # insert & compute diff over synthetic
-            diff = basetsh.insert(
+            diff = self.manual_store.insert(
                 cn, ts, name, author, _insertion_date=_insertion_date
             )
 
@@ -67,8 +71,7 @@ class TimeSerie(BaseTS):
 
         else:
             # insert & compute diff over automatic
-            basetsh = BaseTS(namespace='{}-automatic'.format(self.namespace))
-            diff = basetsh.insert(
+            diff = self.auto_store.insert(
                 cn, ts, name, author,
                 _insertion_date=_insertion_date
             )
@@ -90,7 +93,7 @@ class TimeSerie(BaseTS):
         if table is None:
             return None, None
 
-        autotsh = BaseTS(namespace='{}-automatic'.format(self.namespace))
+        autotsh = self.auto_store
         auto = autotsh.get(cn, name,
                            revision_date=revision_date,
                            from_value_date=from_value_date,
