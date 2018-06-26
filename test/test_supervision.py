@@ -1,4 +1,3 @@
-from pathlib import Path
 from datetime import datetime
 import pytest
 
@@ -6,9 +5,6 @@ import pandas as pd
 import numpy as np
 
 from tshistory_supervision.tsio import TimeSerie
-
-
-DATADIR = Path(__file__).parent / 'data'
 
 
 def assert_df(expected, df):
