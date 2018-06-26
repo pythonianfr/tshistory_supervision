@@ -1,3 +1,4 @@
+from pathlib import Path
 from datetime import datetime
 import pytest
 
@@ -419,14 +420,6 @@ def test_more_manual(engine, tsh):
 2015-01-04     True
 2015-01-05     True
 """, marker)
-
-    tshm = TimeSerie('tsh-manual')
-    man = tshm.get(engine, 'ts_exp1', _keep_nans=True)
-    assert_df("""
-2015-01-03   -3.0
-2015-01-04   -3.0
-2015-01-05    NaN
-""", man)
 
 
 def test_before_first_insertion(engine, tsh):

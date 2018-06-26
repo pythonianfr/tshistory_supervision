@@ -39,36 +39,27 @@ class TimeSerie(BaseTS):
       value.
 
     We can explain the workflow like with a traditional DVCS graph,
-    with three branches: "automatic", "manual" and "synthetic".
+    with two branches: "automatic" and "synthetic".
 
     All automatic fetches go into the automatic branch (and thus are
     diffed against each other).
 
     The synthetic series receive all the non-empty differences
-    resulting from inserting to the automatic series, and also
-    all the manual entries.
+    resulting from inserting to the automatic series, and also all the
+    manual entries.
 
-    The manual editions can be computed as a diff between synthetic
-    and automatic series, but for convenience we also store them
-    explicitly.
+    The manual editions are computed as a diffs between synthetic and
+    automatic series.
+
     """
 
     def __init__(self, *a, **kw):
         super().__init__(*a, **kw)
-        self.manual_store = BaseTS(namespace='{}-manual'.format(self.namespace))
         self.auto_store = BaseTS(namespace='{}-automatic'.format(self.namespace))
 
     def insert(self, cn, ts, name, author, _insertion_date=None, manual=False):
         if manual:
-            # insert & compute diff over synthetic
-            diff = self.manual_store.insert(
-                cn, ts, name, author, _insertion_date=_insertion_date
-            )
-
-            if diff is None:
-                return
             diff = ts
-
         else:
             # insert & compute diff over automatic
             diff = self.auto_store.insert(
