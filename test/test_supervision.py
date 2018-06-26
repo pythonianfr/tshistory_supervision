@@ -49,6 +49,15 @@ def test_mercure_serie(engine, tsh):
 """, pd.read_sql('select * from tsh.changeset_series', engine))
 
 
+def test_long_name(engine, tsh):
+    serie = genserie(datetime(2010, 1, 1), 'D', 40)
+
+    name = 'gas.lng.country.trinidad_and_tobago.net_imports.daily'
+
+    with engine.connect() as cn:
+        tsh.insert(cn, serie, name, 'celeste')
+
+
 def test_differential(engine, tsh):
     ts_begin = genserie(datetime(2010, 1, 1), 'D', 10)
     tsh.insert(engine, ts_begin, 'ts_test', 'test')
