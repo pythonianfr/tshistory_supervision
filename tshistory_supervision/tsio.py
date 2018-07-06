@@ -78,6 +78,24 @@ class TimeSerie(BaseTS):
 
     # supervision specific API
 
+    def get_overrides(self, cn, name, revision_date=None,
+                      from_value_date=None, to_value_date=None):
+        autotsh = self.auto_store
+        auto = autotsh.get(cn, name,
+                           revision_date=revision_date,
+                           from_value_date=from_value_date,
+                           to_value_date=to_value_date,
+                           _keep_nans=True)
+        synth = self.get(cn, name,
+                         revision_date=revision_date,
+                         from_value_date=from_value_date,
+                         to_value_date=to_value_date,
+                         _keep_nans=True)
+        manual = self.diff(auto, synth)
+
+        manual.name = name
+        return manual
+
     def get_ts_marker(self, cn, name, revision_date=None,
                       from_value_date=None, to_value_date=None):
         table = self._get_ts_table(cn, name)

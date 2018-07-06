@@ -335,6 +335,12 @@ def test_manual_overrides(engine, tsh):
 2010-01-09    4.0
 """, tsh.get(engine, 'ts_mixte'))
 
+    manual = tsh.get_overrides(engine, 'ts_mixte')
+    assert_df("""
+2010-01-06    3.0
+2010-01-09    4.0
+""", manual)
+
 
 def test_first_manual(engine, tsh):
     ts_begin = genserie(datetime(2010, 1, 1), 'D', 10)
