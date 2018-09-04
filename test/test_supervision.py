@@ -5,6 +5,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
+from tshistory.testutil import assert_structures
 from tshistory_supervision.tsio import TimeSerie
 
 
@@ -485,3 +486,39 @@ def test_series_dtype(engine, tsh):
                    'error2',
                    'test')
     assert 'Type error when inserting error2, new type is object, type in base is float64' == str(excinfo.value)
+
+
+def test_serie_deletion(engine, tsh):
+
+    def testit(tsh):
+        ts = genserie(datetime(2018, 1, 10), 'H', 10)
+        tsh.insert(engine, ts, 'keepme', 'Babar')
+        tsh.insert(engine, ts, 'deleteme', 'Celeste')
+        ts = genserie(datetime(2018, 1, 12), 'H', 10)
+        tsh.insert(engine, ts, 'keepme', 'Babar')
+        tsh.insert(engine, ts, 'deleteme', 'Celeste')
+
+        seriecount, csetcount, csetseriecount = assert_structures(engine, tsh)
+
+        with engine.begin() as cn:
+            tsh.delete(cn, 'deleteme')
+
+        assert not tsh.exists(engine, 'deleteme')
+        log = [entry['author']
+               for entry in tsh.log(engine, names=('keepme', 'deleteme'))]
+        assert log == ['Babar', 'Babar']
+
+        seriecount2, csetcount2, csetseriecount2 = assert_structures(engine, tsh)
+
+        assert csetcount - csetcount2  == 2
+        assert csetseriecount - csetseriecount2 == 2
+        assert seriecount - seriecount2 == 1
+
+        with pytest.raises(AssertionError) as werr:
+            tsh.delete(engine, 'keepme')
+        assert werr.value.args[0] == 'use a transaction object'
+
+        tsh.insert(engine, ts, 'deleteme', 'Celeste')
+
+    testit(tsh)
+    testit(tsh.auto_store)

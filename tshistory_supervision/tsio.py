@@ -76,6 +76,10 @@ class TimeSerie(BaseTS):
         )
         return a
 
+    def delete(self, cn, seriename):
+        super().delete(cn, seriename)
+        self.auto_store.delete(cn, seriename)
+
     # supervision specific API
 
     def get_overrides(self, cn, name, revision_date=None,
