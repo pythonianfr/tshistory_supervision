@@ -51,7 +51,7 @@ def test_long_name(engine, tsh):
 
     name = 'gas.lng.country.trinidad_and_tobago.net_imports.daily'
 
-    with engine.connect() as cn:
+    with engine.begin() as cn:
         tsh.insert(cn, serie, name, 'celeste')
 
 

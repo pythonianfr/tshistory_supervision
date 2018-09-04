@@ -18,10 +18,8 @@ def engine(request):
     uri = 'postgresql://localhost:{}/postgres'.format(port)
     e = create_engine(uri)
     meta = MetaData()
-    with e.connect() as cn:
-        reset(cn)
-    with e.connect() as cn:
-        init(cn, meta)
+    reset(e)
+    init(e, meta)
     yield e
 
 
