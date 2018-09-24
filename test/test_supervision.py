@@ -52,9 +52,9 @@ def test_non_monotonic_autodiff(engine, tsh):
     s2 = pd.Series([2, 3.1], index=[utcdt(2018, 1, 2), utcdt(2018, 1, 3)])
 
     tsh.insert(engine, s1, 'nmdiff', 'Babar')
-    with pytest.raises(AssertionError) as err:
-        tsh.insert(engine, s2, 'nmdiff', 'Celeste')
-    assert err.value.args[0] == 'The index is not monotonic'
+    # all is well, but we have to index sort the intermediate diff
+    # in .insert
+    tsh.insert(engine, s2, 'nmdiff', 'Celeste')
 
 
 def test_differential(engine, tsh):
