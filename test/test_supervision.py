@@ -5,7 +5,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from tshistory.testutil import assert_structures
+from tshistory.testutil import assert_structures, utcdt
 from tshistory_supervision.tsio import TimeSerie
 
 
@@ -45,6 +45,16 @@ def test_mercure_serie(engine, tsh):
    cset  serie
 0     1      1
 """, pd.read_sql('select * from tsh.changeset_series', engine))
+
+
+def test_non_monotonic_autodiff(engine, tsh):
+    s1 = pd.Series([1, 3], index=[utcdt(2018, 1, 1), utcdt(2018, 1, 3)])
+    s2 = pd.Series([2, 3.1], index=[utcdt(2018, 1, 2), utcdt(2018, 1, 3)])
+
+    tsh.insert(engine, s1, 'nmdiff', 'Babar')
+    with pytest.raises(AssertionError) as err:
+        tsh.insert(engine, s2, 'nmdiff', 'Celeste')
+    assert err.value.args[0] == 'The index is not monotonic'
 
 
 def test_differential(engine, tsh):
