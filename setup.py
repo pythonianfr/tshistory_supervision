@@ -2,11 +2,11 @@ from setuptools import setup
 
 
 setup(name='tshistory_supervision',
-      version='0.2.0',
+      version='0.3.0',
       author='Pythonian',
       author_email='aurelien.campeas@pythonian.fr, arnaud.campeas@pythonian.fr',
       url='https://bitbucket.org/pythonian/tshistory_supervision',
-      description='Store timeseries histories into postgres',
+      description='Provide a supervision mechanism over `tshistory`',
 
       packages=['tshistory_supervision'],
       install_requires=[
