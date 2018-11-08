@@ -25,4 +25,7 @@ def engine(request):
 
 @pytest.fixture(scope='session')
 def tsh(request, engine):
-    return TimeSerie()
+    tsh = TimeSerie()
+    tsh._testing = True
+    tsh.auto_store._testing = True
+    return tsh
