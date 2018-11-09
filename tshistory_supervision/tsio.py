@@ -57,13 +57,16 @@ class TimeSerie(BaseTS):
         super().__init__(*a, **kw)
         self.auto_store = BaseTS(namespace='{}-automatic'.format(self.namespace))
 
-    def insert(self, cn, ts, name, author, _insertion_date=None, manual=False):
+    def insert(self, cn, ts, name, author,
+               metadata=None,
+               _insertion_date=None, manual=False):
         if manual:
             diff = ts
         else:
             # insert & compute diff over automatic
             diff = self.auto_store.insert(
                 cn, ts, name, author,
+                metadata=metadata,
                 _insertion_date=_insertion_date
             )
             if diff is None:
@@ -72,6 +75,7 @@ class TimeSerie(BaseTS):
         # insert the diff over automatic or the manual edit into synthetic
         a = super().insert(
             cn, diff, name, author,
+            metadata=metadata,
             _insertion_date=_insertion_date
         )
         return a
