@@ -4,6 +4,7 @@ import numpy as np
 from sqlalchemy import Column, Boolean, select, desc
 from sqlalchemy.dialects.postgresql import BYTEA
 
+from tshistory.util import tx
 from tshistory.tsio import TimeSerie as BaseTS
 
 
@@ -57,6 +58,7 @@ class TimeSerie(BaseTS):
         super().__init__(*a, **kw)
         self.auto_store = BaseTS(namespace='{}-automatic'.format(self.namespace))
 
+    @tx
     def insert(self, cn, ts, name, author,
                metadata=None,
                _insertion_date=None, manual=False):
@@ -80,12 +82,14 @@ class TimeSerie(BaseTS):
         )
         return a
 
+    @tx
     def delete(self, cn, seriename):
         super().delete(cn, seriename)
         self.auto_store.delete(cn, seriename)
 
     # supervision specific API
 
+    @tx
     def get_overrides(self, cn, name, revision_date=None,
                       from_value_date=None, to_value_date=None):
         autotsh = self.auto_store
@@ -104,6 +108,7 @@ class TimeSerie(BaseTS):
         manual.name = name
         return manual
 
+    @tx
     def get_ts_marker(self, cn, name, revision_date=None,
                       from_value_date=None, to_value_date=None):
         table = self._get_ts_table(cn, name)
