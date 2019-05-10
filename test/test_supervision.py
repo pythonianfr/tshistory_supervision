@@ -6,7 +6,6 @@ import pandas as pd
 import numpy as np
 
 from tshistory.testutil import assert_structures, utcdt
-from tshistory_supervision.tsio import TimeSerie
 
 
 def assert_df(expected, df):
@@ -511,8 +510,8 @@ def test_serie_deletion(engine, tsh):
 
         seriecount2, csetcount2, csetseriecount2 = assert_structures(engine, tsh)
 
-        assert csetcount - csetcount2  == 2
-        assert csetseriecount - csetseriecount2 == 2
+        assert csetcount - csetcount2 == 0
+        assert csetseriecount - csetseriecount2 == 0
         assert seriecount - seriecount2 == 1
 
         tsh.insert(engine, ts, 'deleteme', 'Celeste')

@@ -5,7 +5,7 @@ from sqlalchemy import Column, Boolean, select, desc
 from sqlalchemy.dialects.postgresql import BYTEA
 
 from tshistory.util import tx
-from tshistory.tsio import TimeSerie as BaseTS
+from tshistory.tsio import timeseries as basets
 
 
 def join_index(ts1, ts2):
@@ -18,7 +18,7 @@ def join_index(ts1, ts2):
     return ts1.index.union(ts2.index)
 
 
-class TimeSerie(BaseTS):
+class timeseries(basets):
     """This class refines the base `tshistory.TimeSerie` by adding a
     specific workflow on top of it.
 
@@ -56,7 +56,7 @@ class TimeSerie(BaseTS):
 
     def __init__(self, *a, **kw):
         super().__init__(*a, **kw)
-        self.auto_store = BaseTS(namespace='{}-automatic'.format(self.namespace))
+        self.auto_store = basets(namespace='{}-automatic'.format(self.namespace))
 
     @tx
     def insert(self, cn, ts, name, author,

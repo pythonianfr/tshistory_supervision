@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytest
 
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine
 
 from pytest_sa_pg import db
 
@@ -12,7 +12,7 @@ from tshistory.schema import (
     tsschema
 )
 
-from tshistory_supervision.tsio import TimeSerie
+from tshistory_supervision.tsio import timeseries
 
 
 DATADIR = Path(__file__).parent / 'test' / 'data'
@@ -27,13 +27,10 @@ def engine(request):
     tsschema('tsh-automatic')
     e = create_engine(uri)
     reset_schemas(e)
-    init_schemas(e, MetaData())
+    init_schemas(e)
     yield e
 
 
 @pytest.fixture(scope='session')
 def tsh(request, engine):
-    tsh = TimeSerie()
-    tsh._testing = True
-    tsh.auto_store._testing = True
-    return tsh
+    return timeseries()
