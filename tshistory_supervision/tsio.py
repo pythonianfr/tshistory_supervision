@@ -55,7 +55,7 @@ class timeseries(basets):
 
     def __init__(self, *a, **kw):
         super().__init__(*a, **kw)
-        self.auto_store = basets(namespace='{}-automatic'.format(self.namespace))
+        self.upstream = basets(namespace='{}-automatic'.format(self.namespace))
 
     @tx
     def insert(self, cn, ts, name, author,
@@ -65,7 +65,7 @@ class timeseries(basets):
             diff = ts
         else:
             # insert & compute diff over automatic
-            diff = self.auto_store.insert(
+            diff = self.upstream.insert(
                 cn, ts, name, author,
                 metadata=metadata,
                 _insertion_date=_insertion_date
@@ -84,25 +84,25 @@ class timeseries(basets):
     @tx
     def delete(self, cn, seriename):
         super().delete(cn, seriename)
-        self.auto_store.delete(cn, seriename)
+        self.upstream.delete(cn, seriename)
 
     # supervision specific API
 
     @tx
     def get_overrides(self, cn, name, revision_date=None,
                       from_value_date=None, to_value_date=None):
-        autotsh = self.auto_store
-        auto = autotsh.get(cn, name,
+        upstreamtsh = self.upstream
+        upstream = upstreamtsh.get(cn, name,
                            revision_date=revision_date,
                            from_value_date=from_value_date,
                            to_value_date=to_value_date,
                            _keep_nans=True)
-        synth = self.get(cn, name,
+        edited = self.get(cn, name,
                          revision_date=revision_date,
                          from_value_date=from_value_date,
                          to_value_date=to_value_date,
                          _keep_nans=True)
-        manual = self.diff(auto, synth)
+        manual = self.diff(upstream, edited)
 
         manual.name = name
         return manual
@@ -114,20 +114,24 @@ class timeseries(basets):
         if table is None:
             return None, None
 
-        autotsh = self.auto_store
-        auto = autotsh.get(cn, name,
-                           revision_date=revision_date,
-                           from_value_date=from_value_date,
-                           to_value_date=to_value_date,
-                           _keep_nans=True)
-        synth = self.get(cn, name,
-                         revision_date=revision_date,
-                         from_value_date=from_value_date,
-                         to_value_date=to_value_date,
-                         _keep_nans=True)
-        manual = self.diff(auto, synth)
+        upstreamtsh = self.upstream
+        upstream = upstreamtsh.get(
+            cn, name,
+            revision_date=revision_date,
+            from_value_date=from_value_date,
+            to_value_date=to_value_date,
+            _keep_nans=True
+        )
+        edited = self.get(
+            cn, name,
+            revision_date=revision_date,
+            from_value_date=from_value_date,
+            to_value_date=to_value_date,
+            _keep_nans=True
+        )
+        manual = self.diff(upstream, edited)
 
-        unionindex = join_index(auto, manual)
+        unionindex = join_index(upstream, manual)
         if unionindex is None:
             # this means both series are empty
             return None, None
@@ -137,4 +141,4 @@ class timeseries(basets):
             mask_manual[manual.index] = True
             mask_manual.name = name
 
-        return synth.dropna(), mask_manual
+        return edited.dropna(), mask_manual

@@ -517,4 +517,4 @@ def test_serie_deletion(engine, tsh):
         tsh.insert(engine, ts, 'deleteme', 'Celeste')
 
     testit(tsh)
-    testit(tsh.auto_store)
+    testit(tsh.upstream)
