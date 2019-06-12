@@ -137,9 +137,4 @@ class timeseries(basets):
             mask_manual[manual.index] = True
             mask_manual.name = name
 
-        ts = self.get(cn, name,
-                      revision_date=revision_date,
-                      from_value_date=from_value_date,
-                      to_value_date=to_value_date)
-        ts.name = name
-        return ts, mask_manual
+        return synth.dropna(), mask_manual
