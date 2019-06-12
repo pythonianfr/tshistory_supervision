@@ -64,7 +64,7 @@ class timeseries(basets):
         if manual:
             diff = ts
         else:
-            # insert & compute diff over automatic
+            # insert & compute diff over upstream
             diff = self.upstream.insert(
                 cn, ts, name, author,
                 metadata=metadata,
@@ -73,7 +73,7 @@ class timeseries(basets):
             if diff is None:
                 return
 
-        # insert the diff over automatic or the manual edit into synthetic
+        # insert the diff over upstream or the manual edit into edited
         a = super().insert(
             cn, diff, name, author,
             metadata=metadata,
