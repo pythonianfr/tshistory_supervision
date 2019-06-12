@@ -55,7 +55,7 @@ class timeseries(basets):
 
     def __init__(self, *a, **kw):
         super().__init__(*a, **kw)
-        self.upstream = basets(namespace='{}-automatic'.format(self.namespace))
+        self.upstream = basets(namespace='{}-upstream'.format(self.namespace))
 
     @tx
     def insert(self, cn, ts, name, author,

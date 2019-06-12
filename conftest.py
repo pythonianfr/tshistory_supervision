@@ -19,7 +19,7 @@ def engine(request):
     db.setup_local_pg_cluster(request, DATADIR, port)
     uri = 'postgresql://localhost:{}/postgres'.format(port)
     sch1 = tsschema()
-    sch2 = tsschema('tsh-automatic')
+    sch2 = tsschema('tsh-upstream')
     e = create_engine(uri)
     sch1.create(e)
     sch2.create(e)

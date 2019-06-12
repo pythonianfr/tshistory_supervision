@@ -12,6 +12,9 @@ setup(name='tshistory_supervision',
       install_requires=[
           'tshistory'
       ],
+      entry_points={'tshistory.subcommands': [
+          'migrate-supervision=tshistory_supervision.cli:migrate_supervision'
+      ]},
       classifiers=[
           'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
