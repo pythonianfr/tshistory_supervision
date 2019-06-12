@@ -19,20 +19,19 @@ def join_index(ts1, ts2):
 
 
 class timeseries(basets):
-    """This class refines the base `tshistory.TimeSerie` by adding a
+    """This class refines the base `tshistory.timeseries` by adding a
     specific workflow on top of it.
 
-    There are two kinds of series : automatically fetched, and
-    manually imposed.  The idea is that some scrapper fetches the
-    automatic series, and endusers sometimes override values from the
-    automatic series.
+    We sometimes work with series that automatically fetched from some
+    upstream source, and then eventually manually corrected (by an
+    expert in the data domain)
 
-    Say, one day, Serie X comes with a bogus value -1 for a given
+    Say, one day, series X comes with a bogus value -1 for a given
     timestamp. The end user sees it and fixes it.
 
     But:
 
-    * we don't want that the next automatic serie fetch with the bogus
+    * we don't want that the next upstream series fetch with the bogus
       value override the fix
 
     * however whenever upstream fixes the value (that is provides a
@@ -40,17 +39,17 @@ class timeseries(basets):
       value.
 
     We can explain the workflow like with a traditional DVCS graph,
-    with two branches: "automatic" and "synthetic".
+    with two branches: "upstream" and "edited".
 
-    All automatic fetches go into the automatic branch (and thus are
+    All upstream fetches go into the upstream branch (and thus are
     diffed against each other).
 
-    The synthetic series receive all the non-empty differences
-    resulting from inserting to the automatic series, and also all the
+    The edited series receive all the non-empty differences
+    resulting from inserting to the upsmtream series, and also all the
     manual entries.
 
-    The manual editions are computed as a diffs between synthetic and
-    automatic series.
+    The manual editions are computed as a diffs between edited and
+    upstream series.
 
     """
 
