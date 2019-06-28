@@ -13,7 +13,8 @@ setup(name='tshistory_supervision',
           'tshistory'
       ],
       entry_points={'tshistory.subcommands': [
-          'migrate-supervision=tshistory_supervision.cli:migrate_supervision'
+          'migrate-supervision=tshistory_supervision.cli:migrate_supervision',
+          'shell=tshistory_supervision.cli:shell'
       ]},
       classifiers=[
           'Development Status :: 4 - Beta',
