@@ -86,6 +86,11 @@ class timeseries(basets):
         super().delete(cn, seriename)
         self.upstream.delete(cn, seriename)
 
+    @tx
+    def rename(self, cn, oldname, newname):
+        super().rename(cn, oldname, newname)
+        self.upstream.rename(cn, oldname, newname)
+
     # supervision specific API
 
     @tx

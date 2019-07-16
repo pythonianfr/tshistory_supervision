@@ -46,6 +46,18 @@ def test_mercure_serie(engine, tsh):
 """, pd.read_sql('select * from tsh.changeset_series', engine))
 
 
+def test_rename(engine, tsh):
+    tsh.insert(engine, genserie(datetime(2010, 1, 1), 'D', 3),
+               'rename-me', 'Babar')
+
+    tsh.rename(engine, 'rename-me', 'renamed')
+    tsh._resetcaches()
+    assert tsh.get(engine, 'rename-me') is None
+    assert tsh.get(engine, 'renamed') is not None
+    assert tsh.upstream.get(engine, 'rename-me') is None
+    assert tsh.upstream.get(engine, 'renamed') is not None
+
+
 def test_non_monotonic_autodiff(engine, tsh):
     s1 = pd.Series([1, 3], index=[utcdt(2018, 1, 1), utcdt(2018, 1, 3)])
     s2 = pd.Series([2, 3.1], index=[utcdt(2018, 1, 2), utcdt(2018, 1, 3)])
