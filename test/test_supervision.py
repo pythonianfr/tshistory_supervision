@@ -5,7 +5,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from tshistory.testutil import assert_structures, utcdt
+from tshistory.testutil import utcdt
 
 
 def assert_df(expected, df):
@@ -24,26 +24,6 @@ def genserie(start, freq, repeat, initval=None, tz=None, name=None):
                                          periods=repeat,
                                          tz=tz))
 
-
-def test_mercure_serie(engine, tsh):
-    # mercure serie have numerical names
-    # this can cause issues if not properly handed to
-    # postgres ...
-    tsh.insert(engine, genserie(datetime(2010, 1, 1), 'D', 3),
-               '42', 'Babar')
-
-    s = tsh.get(engine, '42')
-    assert 3 == len(s)
-
-    assert_df("""
-   id seriename table_name
-0   1        42         42
-""", pd.read_sql('select id, seriename, table_name from tsh.registry', engine))
-
-    assert_df("""
-   cset  serie
-0     1      1
-""", pd.read_sql('select * from tsh.changeset_series', engine))
 
 
 def test_rename(engine, tsh):
@@ -509,22 +489,10 @@ def test_serie_deletion(engine, tsh):
         tsh.insert(engine, ts, 'keepme', 'Babar')
         tsh.insert(engine, ts, 'deleteme', 'Celeste')
 
-        seriecount, csetcount, csetseriecount = assert_structures(engine, tsh)
-
         with engine.begin() as cn:
             tsh.delete(cn, 'deleteme')
 
         assert not tsh.exists(engine, 'deleteme')
-        log = [entry['author']
-               for entry in tsh.log(engine, names=('keepme', 'deleteme'))]
-        assert log == ['Babar', 'Babar']
-
-        seriecount2, csetcount2, csetseriecount2 = assert_structures(engine, tsh)
-
-        assert csetcount - csetcount2 == 0
-        assert csetseriecount - csetseriecount2 == 0
-        assert seriecount - seriecount2 == 1
-
         tsh.insert(engine, ts, 'deleteme', 'Celeste')
 
     testit(tsh)
