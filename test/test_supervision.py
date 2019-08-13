@@ -27,8 +27,13 @@ def genserie(start, freq, repeat, initval=None, tz=None, name=None):
 
 
 def test_rename(engine, tsh):
+    assert tsh.supervision_status(engine, 'rename-me') == 'unsupervised'
     tsh.insert(engine, genserie(datetime(2010, 1, 1), 'D', 3),
                'rename-me', 'Babar')
+    assert tsh.supervision_status(engine, 'rename-me') == 'unsupervised'
+    tsh.insert(engine, genserie(datetime(2010, 1, 2), 'D', 3),
+               'rename-me', 'Babar', manual=True)
+    assert tsh.supervision_status(engine, 'rename-me') == 'supervised'
 
     tsh.rename(engine, 'rename-me', 'renamed')
     tsh._resetcaches()
@@ -133,6 +138,8 @@ def test_manual_overrides(engine, tsh):
     ts_begin.loc['2010-01-04'] = -1
     tsh.insert(engine, ts_begin, 'ts_mixte', 'test')
 
+    assert tsh.supervision_status(engine, 'ts_mixte') == 'unsupervised'
+
     # -1 represents bogus upstream data
     assert_df("""
 2010-01-01    2.0
@@ -174,12 +181,37 @@ def test_manual_overrides(engine, tsh):
 2010-01-06    2.0
 2010-01-07    2.0
 """, tsh.get(engine, 'ts_mixte'))
+    assert tsh.supervision_status(engine, 'ts_mixte') == 'unsupervised'
+    assert tsh.upstream.get(engine, 'ts_mixte') is None
 
     # edit the bogus upstream data: -1 -> 3
     # also edit the next value
     ts_manual = genserie(datetime(2010, 1, 4), 'D', 2, [3])
     tsh.insert(engine, ts_manual, 'ts_mixte', 'test', manual=True)
-    tsh.get_ts_marker(engine, 'ts_mixte')
+    assert tsh.supervision_status(engine, 'ts_mixte') == 'supervised'
+    upstream = tsh.upstream.get(engine, 'ts_mixte')
+
+    assert_df("""
+2010-01-01    2.0
+2010-01-02    2.0
+2010-01-03    2.0
+2010-01-04   -1.0
+2010-01-05    2.0
+2010-01-06    2.0
+2010-01-07    2.0
+""", upstream)
+
+    ts, marker = tsh.get_ts_marker(engine, 'ts_mixte')
+
+    assert_df("""
+2010-01-01    False
+2010-01-02    False
+2010-01-03    False
+2010-01-04     True
+2010-01-05     True
+2010-01-06    False
+2010-01-07    False
+""", marker)
 
     assert_df("""
 2010-01-01    2.0
@@ -189,7 +221,7 @@ def test_manual_overrides(engine, tsh):
 2010-01-05    3.0
 2010-01-06    2.0
 2010-01-07    2.0
-""", tsh.get(engine, 'ts_mixte'))
+""", ts)
 
     # refetch upstream: the fixed value override must remain in place
     assert -1 == ts_begin['2010-01-04']
@@ -334,24 +366,8 @@ def test_manual_overrides(engine, tsh):
 """, manual)
 
 
-def test_first_manual(engine, tsh):
+def test_handcrafted(engine, tsh):
     ts_begin = genserie(datetime(2010, 1, 1), 'D', 10)
-    tsh.insert(engine, ts_begin, 'ts_only', 'test', manual=True)
-
-    assert_df("""
-2010-01-01    0.0
-2010-01-02    1.0
-2010-01-03    2.0
-2010-01-04    3.0
-2010-01-05    4.0
-2010-01-06    5.0
-2010-01-07    6.0
-2010-01-08    7.0
-2010-01-09    8.0
-2010-01-10    9.0
-""", tsh.get(engine, 'ts_only'))
-
-    # we should detect the emission of a message
     tsh.insert(engine, ts_begin, 'ts_only', 'test', manual=True)
 
     assert_df("""
@@ -371,7 +387,19 @@ def test_first_manual(engine, tsh):
     ts_slight_variation.iloc[3] = 0
     ts_slight_variation.iloc[6] = 0
     tsh.insert(engine, ts_slight_variation, 'ts_only', 'test')
-    tsh.get(engine, 'ts_only').to_string().strip()
+
+    assert_df("""
+2010-01-01    0.0
+2010-01-02    1.0
+2010-01-03    2.0
+2010-01-04    0.0
+2010-01-05    4.0
+2010-01-06    5.0
+2010-01-07    0.0
+2010-01-08    7.0
+2010-01-09    8.0
+2010-01-10    9.0
+""", tsh.get(engine, 'ts_only'))
 
     # should be a noop
     tsh.insert(engine, ts_slight_variation, 'ts_only', 'test', manual=True)
