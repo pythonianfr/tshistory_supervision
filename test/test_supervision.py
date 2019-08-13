@@ -148,7 +148,6 @@ def test_differential(engine, tsh):
 
 
 def test_manual_overrides(engine, tsh):
-    tsh._snapshot_interval = 10
     # start testing manual overrides
     ts_begin = genserie(datetime(2010, 1, 1), 'D', 5, [2.])
     ts_begin.loc['2010-01-04'] = -1
