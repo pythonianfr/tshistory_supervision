@@ -152,6 +152,13 @@ class timeseries(basets):
         super().rename(cn, oldname, newname)
         self.upstream.rename(cn, oldname, newname)
 
+    @tx
+    def strip(self, cn, name, csid):
+        if self.supervision_status(cn, name) == 'supervised':
+            raise ValueError(f'supervised series `{name}` cannot be striped')
+
+        super().strip(cn, name, csid)
+
     # supervision specific API
 
     @tx

@@ -277,6 +277,42 @@ def test_manual_overrides(engine, tsh):
 """, manual)
 
 
+def test_strip(engine, tsh):
+    ts = genserie(datetime(2019, 1, 1), 'D', 3)
+    tsh.insert(
+        engine, ts, 'strip-unsupervised', 'test',
+        _insertion_date=utcdt(2019, 1, 1)
+    )
+    csid = tsh.changeset_at(engine, 'strip-unsupervised', utcdt(2019, 1, 1))
+    tsh.strip(engine, 'strip-unsupervised', csid)
+
+    ts = genserie(datetime(2019, 1, 1), 'D', 3)
+    tsh.insert(
+        engine, ts, 'strip-handcrafted', 'test',
+        manual=True,
+        _insertion_date=utcdt(2019, 1, 1)
+    )
+    csid = tsh.changeset_at(engine, 'strip-handcrafted', utcdt(2019, 1, 1))
+    tsh.strip(engine, 'strip-handcrafted', csid)
+
+    ts = genserie(datetime(2019, 1, 1), 'D', 3)
+    tsh.insert(
+        engine, ts, 'strip-supervised', 'test',
+        _insertion_date=utcdt(2019, 1, 1)
+    )
+    ts = genserie(datetime(2019, 1, 2), 'D', 3)
+    tsh.insert(
+        engine, ts, 'strip-supervised', 'test',
+        manual=True,
+        _insertion_date=utcdt(2019, 1, 2)
+    )
+
+    with pytest.raises(ValueError) as err:
+        csid = tsh.changeset_at(engine, 'strip-supervised', utcdt(2019, 1, 1))
+        tsh.strip(engine, 'strip-supervised', csid)
+
+
+
 def test_handcrafted(engine, tsh):
     ts_begin = genserie(datetime(2010, 1, 1), 'D', 10)
     tsh.insert(engine, ts_begin, 'ts_only', 'test', manual=True)
