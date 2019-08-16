@@ -36,7 +36,7 @@ def test_rename(engine, tsh):
     assert tsh.supervision_status(engine, 'rename-me') == 'supervised'
 
     tsh.rename(engine, 'rename-me', 'renamed')
-    tsh._resetcaches()
+
     assert tsh.get(engine, 'rename-me') is None
     assert tsh.get(engine, 'renamed') is not None
     assert tsh.upstream.get(engine, 'rename-me') is None
