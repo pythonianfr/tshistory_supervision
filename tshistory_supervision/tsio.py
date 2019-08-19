@@ -183,7 +183,7 @@ class timeseries(basets):
     @tx
     def get_ts_marker(self, cn, name, revision_date=None,
                       from_value_date=None, to_value_date=None):
-        table = self._get_ts_table(cn, name)
+        table = self._series_to_tablename(cn, name)
         if table is None:
             return None, None
 
