@@ -281,7 +281,7 @@ def test_strip(engine, tsh):
     ts = genserie(datetime(2019, 1, 1), 'D', 3)
     tsh.insert(
         engine, ts, 'strip-unsupervised', 'test',
-        _insertion_date=utcdt(2019, 1, 1)
+        insertion_date=utcdt(2019, 1, 1)
     )
     csid = tsh.changeset_at(engine, 'strip-unsupervised', utcdt(2019, 1, 1))
     tsh.strip(engine, 'strip-unsupervised', csid)
@@ -290,7 +290,7 @@ def test_strip(engine, tsh):
     tsh.insert(
         engine, ts, 'strip-handcrafted', 'test',
         manual=True,
-        _insertion_date=utcdt(2019, 1, 1)
+        insertion_date=utcdt(2019, 1, 1)
     )
     csid = tsh.changeset_at(engine, 'strip-handcrafted', utcdt(2019, 1, 1))
     tsh.strip(engine, 'strip-handcrafted', csid)
@@ -298,13 +298,13 @@ def test_strip(engine, tsh):
     ts = genserie(datetime(2019, 1, 1), 'D', 3)
     tsh.insert(
         engine, ts, 'strip-supervised', 'test',
-        _insertion_date=utcdt(2019, 1, 1)
+        insertion_date=utcdt(2019, 1, 1)
     )
     ts = genserie(datetime(2019, 1, 2), 'D', 3)
     tsh.insert(
         engine, ts, 'strip-supervised', 'test',
         manual=True,
-        _insertion_date=utcdt(2019, 1, 2)
+        insertion_date=utcdt(2019, 1, 2)
     )
 
     with pytest.raises(ValueError) as err:

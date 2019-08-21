@@ -76,13 +76,13 @@ class timeseries(basets):
     @tx
     def insert(self, cn, ts, name, author,
                metadata=None,
-               _insertion_date=None, manual=False):
+               insertion_date=None, manual=False):
         if not self.exists(cn, name):
             # initial insert
             diff = super().insert(
                 cn, ts, name, author,
                 metadata=metadata,
-                _insertion_date=_insertion_date
+                insertion_date=insertion_date
             )
             if diff is None:
                 return
@@ -103,7 +103,7 @@ class timeseries(basets):
                 self.upstream.insert(
                     cn, current, name, author,
                     metadata=metadata,
-                    _insertion_date=_insertion_date
+                    insertion_date=insertion_date
                 )
                 # update supervision status
                 meta = self.metadata(cn, name)
@@ -113,7 +113,7 @@ class timeseries(basets):
             return super().insert(
                 cn, ts, name, author,
                 metadata=metadata,
-                _insertion_date=_insertion_date
+                insertion_date=insertion_date
             )
 
         assert supervision_status in ('supervised', 'handcrafted')
@@ -124,7 +124,7 @@ class timeseries(basets):
             diff = self.upstream.insert(
                 cn, ts, name, author,
                 metadata=metadata,
-                _insertion_date=_insertion_date
+                insertion_date=insertion_date
             )
 
             if supervision_status == 'handcrafted':
@@ -140,7 +140,7 @@ class timeseries(basets):
         a = super().insert(
             cn, diff, name, author,
             metadata=metadata,
-            _insertion_date=_insertion_date
+            insertion_date=insertion_date
         )
         return a
 
