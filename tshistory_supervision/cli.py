@@ -58,6 +58,26 @@ def migrate_supervision_dot_5_to_dot_6(dburi, name=None, namespace='tsh'):
     print('supervised', len(categories['supervised']))
 
 
+@click.command(name='list-supervised-series-mismatch')
+@click.argument('db-uri')
+@click.option('--namespace', default='tsh')
+def list_mismatch(db_uri, namespace='tsh'):
+    e = create_engine(find_dburi(db_uri))
+
+    tsh = timeseries(namespace)
+    series = set(tsh.list_series(e))
+    upstream = set(tsh.upstream.list_series(e))
+    diff = upstream - series
+    if not diff:
+        print('no mismatch')
+        return
+
+    print(f'found {len(diff)} series in upstream')
+    for name in sorted(diff):
+        assert (False, True) == (tsh.exists(e, name), tsh.upstream.exists(e, name))
+        print(name)
+
+
 @click.command(name='shell')
 @click.argument('db-uri')
 @click.option('--namespace', default='tsh')
