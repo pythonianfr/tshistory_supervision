@@ -167,16 +167,20 @@ class timeseries(basets):
     def get_overrides(self, cn, name, revision_date=None,
                       from_value_date=None, to_value_date=None):
         upstreamtsh = self.upstream
-        upstream = upstreamtsh.get(cn, name,
-                           revision_date=revision_date,
-                           from_value_date=from_value_date,
-                           to_value_date=to_value_date,
-                           _keep_nans=True)
-        edited = self.get(cn, name,
-                         revision_date=revision_date,
-                         from_value_date=from_value_date,
-                         to_value_date=to_value_date,
-                         _keep_nans=True)
+        upstream = upstreamtsh.get(
+            cn, name,
+            revision_date=revision_date,
+            from_value_date=from_value_date,
+            to_value_date=to_value_date,
+            _keep_nans=True
+        )
+        edited = self.get(
+            cn, name,
+            revision_date=revision_date,
+            from_value_date=from_value_date,
+            to_value_date=to_value_date,
+            _keep_nans=True
+        )
         manual = self.diff(upstream, edited)
 
         manual.name = name
