@@ -76,10 +76,18 @@ class timeseries(basets):
     @tx
     def update(self, cn, ts, name, author,
                metadata=None,
-               insertion_date=None, manual=False):
+               insertion_date=None, manual=False,
+               __supermethod__=None,
+               __upmethod__=None):
+
+        # update vs replace handling
+        if __supermethod__ is None:
+            __supermethod__ = super().update
+            __upmethod__ = self.upstream.update
+
         if not self.exists(cn, name):
             # initial insert
-            diff = super().update(
+            diff = __supermethod__(
                 cn, ts, name, author,
                 metadata=metadata,
                 insertion_date=insertion_date
@@ -100,7 +108,7 @@ class timeseries(basets):
                 # let's take a copy of the current series state
                 # into upstream and proceed forward
                 current = self.get(cn, name)
-                self.upstream.update(
+                __upmethod__(
                     cn, current, name, author,
                     metadata=metadata,
                     insertion_date=insertion_date
@@ -110,7 +118,7 @@ class timeseries(basets):
                 meta['supervision_status'] = 'supervised'
                 self.update_metadata(cn, name, meta, internal=True)
             # now insert what we got
-            return super().update(
+            return __supermethod__(
                 cn, ts, name, author,
                 metadata=metadata,
                 insertion_date=insertion_date
@@ -121,7 +129,7 @@ class timeseries(basets):
             diff = ts
         else:
             # insert & compute diff over upstream
-            diff = self.upstream.update(
+            diff = __upmethod__(
                 cn, ts, name, author,
                 metadata=metadata,
                 insertion_date=insertion_date
@@ -137,15 +145,24 @@ class timeseries(basets):
                 return
 
         # insert the diff over upstream or the manual edit into edited
-        a = super().update(
+        a = __supermethod__(
             cn, diff, name, author,
             metadata=metadata,
             insertion_date=insertion_date
         )
         return a
 
-    def replace(self, *a, **kw):
-        raise NotImplementedError('nein')
+    def replace(self, cn, ts, name, author,
+               metadata=None,
+               insertion_date=None, manual=False):
+        self.update(
+            cn, ts, name, author,
+            metadata=metadata,
+            insertion_date=insertion_date,
+            manual=manual,
+            __supermethod__=super().replace,
+            __upmethod__=self.upstream.replace
+        )
 
     @tx
     def delete(self, cn, seriename):

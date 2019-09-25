@@ -43,7 +43,7 @@ def test_rename(engine, tsh):
     assert tsh.upstream.get(engine, 'renamed') is not None
 
 
-def test_manual_overrides(engine, tsh):
+def test_manual_update(engine, tsh):
     # start testing manual overrides
     ts_begin = genserie(datetime(2010, 1, 1), 'D', 5, [2.])
     ts_begin.loc['2010-01-04'] = -1
@@ -275,6 +275,98 @@ def test_manual_overrides(engine, tsh):
 2010-01-06    3.0
 2010-01-09    4.0
 """, manual)
+
+
+def test_manual_replace(engine, tsh):
+    # start testing manual overrides
+    ts_begin = genserie(datetime(2010, 1, 1), 'D', 5, [2.])
+    ts_begin.loc['2010-01-04'] = -1
+    tsh.replace(engine, ts_begin, 'mix_replace', 'test')
+
+    assert tsh.supervision_status(engine, 'mix_replace') == 'unsupervised'
+
+    # -1 represents bogus upstream data
+    assert_df("""
+2010-01-01    2.0
+2010-01-02    2.0
+2010-01-03    2.0
+2010-01-04   -1.0
+2010-01-05    2.0
+""", tsh.get(engine, 'mix_replace'))
+
+    # test marker for first inserstion
+    _, marker = tsh.get_ts_marker(engine, 'mix_replace')
+    assert not marker.any()
+
+    # refresh all the period + 1 extra data point
+    ts_more = genserie(datetime(2010, 1, 1), 'D', 6, [2])
+    ts_more.loc['2010-01-04'] = -1
+    tsh.replace(engine, ts_more, 'mix_replace', 'test')
+
+    assert_df("""
+2010-01-01    2.0
+2010-01-02    2.0
+2010-01-03    2.0
+2010-01-04   -1.0
+2010-01-05    2.0
+2010-01-06    2.0
+""", tsh.get(engine, 'mix_replace'))
+
+    # just append an extra data point
+    # with no intersection with the previous ts
+    ts_one_more = genserie(datetime(2010, 1, 7), 'D', 1, [2])
+    tsh.update(engine, ts_one_more, 'mix_replace', 'test')
+
+    assert_df("""
+2010-01-01    2.0
+2010-01-02    2.0
+2010-01-03    2.0
+2010-01-04   -1.0
+2010-01-05    2.0
+2010-01-06    2.0
+2010-01-07    2.0
+""", tsh.get(engine, 'mix_replace'))
+    assert tsh.supervision_status(engine, 'mix_replace') == 'unsupervised'
+    assert tsh.upstream.get(engine, 'mix_replace') is None
+
+    # edit the bogus upstream data: -1 -> 3
+    # also edit the next value
+    ts_manual = genserie(datetime(2010, 1, 4), 'D', 2, [3])
+    tsh.update(engine, ts_manual, 'mix_replace', 'test', manual=True)
+    assert tsh.supervision_status(engine, 'mix_replace') == 'supervised'
+    upstream = tsh.upstream.get(engine, 'mix_replace')
+
+    assert_df("""
+2010-01-01    2.0
+2010-01-02    2.0
+2010-01-03    2.0
+2010-01-04   -1.0
+2010-01-05    2.0
+2010-01-06    2.0
+2010-01-07    2.0
+""", upstream)
+
+    ts, marker = tsh.get_ts_marker(engine, 'mix_replace')
+
+    assert_df("""
+2010-01-01    False
+2010-01-02    False
+2010-01-03    False
+2010-01-04     True
+2010-01-05     True
+2010-01-06    False
+2010-01-07    False
+""", marker)
+
+    assert_df("""
+2010-01-01    2.0
+2010-01-02    2.0
+2010-01-03    2.0
+2010-01-04    3.0
+2010-01-05    3.0
+2010-01-06    2.0
+2010-01-07    2.0
+""", ts)
 
 
 def test_strip(engine, tsh):
