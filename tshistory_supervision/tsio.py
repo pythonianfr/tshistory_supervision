@@ -74,12 +74,12 @@ class timeseries(basets):
         return 'unsupervised'
 
     @tx
-    def insert(self, cn, ts, name, author,
+    def update(self, cn, ts, name, author,
                metadata=None,
                insertion_date=None, manual=False):
         if not self.exists(cn, name):
             # initial insert
-            diff = super().insert(
+            diff = super().update(
                 cn, ts, name, author,
                 metadata=metadata,
                 insertion_date=insertion_date
@@ -100,7 +100,7 @@ class timeseries(basets):
                 # let's take a copy of the current series state
                 # into upstream and proceed forward
                 current = self.get(cn, name)
-                self.upstream.insert(
+                self.upstream.update(
                     cn, current, name, author,
                     metadata=metadata,
                     insertion_date=insertion_date
@@ -110,7 +110,7 @@ class timeseries(basets):
                 meta['supervision_status'] = 'supervised'
                 self.update_metadata(cn, name, meta, internal=True)
             # now insert what we got
-            return super().insert(
+            return super().update(
                 cn, ts, name, author,
                 metadata=metadata,
                 insertion_date=insertion_date
@@ -121,7 +121,7 @@ class timeseries(basets):
             diff = ts
         else:
             # insert & compute diff over upstream
-            diff = self.upstream.insert(
+            diff = self.upstream.update(
                 cn, ts, name, author,
                 metadata=metadata,
                 insertion_date=insertion_date
@@ -137,12 +137,15 @@ class timeseries(basets):
                 return
 
         # insert the diff over upstream or the manual edit into edited
-        a = super().insert(
+        a = super().update(
             cn, diff, name, author,
             metadata=metadata,
             insertion_date=insertion_date
         )
         return a
+
+    def replace(self, *a, **kw):
+        raise NotImplementedError('nein')
 
     @tx
     def delete(self, cn, seriename):
