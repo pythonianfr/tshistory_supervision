@@ -74,16 +74,11 @@ class timeseries(basets):
         return 'unsupervised'
 
     @tx
-    def update(self, cn, ts, name, author,
-               metadata=None,
-               insertion_date=None, manual=False,
-               __supermethod__=None,
-               __upmethod__=None):
-
-        # update vs replace handling
-        if __supermethod__ is None:
-            __supermethod__ = super().update
-            __upmethod__ = self.upstream.update
+    def __supervise__(self, cn, ts, name, author,
+                      metadata=None,
+                      insertion_date=None, manual=False,
+                      __supermethod__=None,
+                      __upmethod__=None):
 
         if not self.exists(cn, name):
             # initial insert
@@ -152,10 +147,24 @@ class timeseries(basets):
         )
         return a
 
+    @tx
+    def update(self, cn, ts, name, author,
+               metadata=None,
+               insertion_date=None, manual=False):
+        return self.__supervise__(
+            cn, ts, name, author,
+            metadata=metadata,
+            insertion_date=insertion_date,
+            manual=manual,
+            __supermethod__=super().update,
+            __upmethod__=self.upstream.update
+        )
+
+    @tx
     def replace(self, cn, ts, name, author,
                metadata=None,
                insertion_date=None, manual=False):
-        self.update(
+        return self.__supervise__(
             cn, ts, name, author,
             metadata=metadata,
             insertion_date=insertion_date,
