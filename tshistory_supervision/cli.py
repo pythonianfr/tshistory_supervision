@@ -9,38 +9,47 @@ from collections import defaultdict
 from tshistory_supervision.tsio import timeseries
 
 
-@click.command(name='migrate-supervision-0.5-to-0.6')
+def compute_supervision_status(tsh, engine, name):
+    synth_idates = tsh.insertion_dates(engine, name)
+    has_upstream = tsh.upstream.exists(engine, name)
+    upstream_idates = (
+        has_upstream and
+        tsh.upstream.insertion_dates(engine, name) or
+        []
+    )
+    if synth_idates and not upstream_idates:
+        status = 'handcrafted'
+    elif len(synth_idates) == len(upstream_idates):
+        status = 'unsupervised'
+    else:
+        status = 'supervised'
+    return status
+
+
+@click.command(name='fix-supervision-status')
 @click.argument('dburi')
 @click.option('--name')
 @click.option('--namespace', default='tsh')
-def migrate_supervision_dot_5_to_dot_6(dburi, name=None, namespace='tsh'):
+def fix_supervision_status(dburi, name=None, namespace='tsh'):
     engine = create_engine(find_dburi(dburi))
     tsh = timeseries(namespace)
     if name:
         series = [name]
     else:
-        series = tsh.list_series(engine)
+        series = [
+            name for name, stype in tsh.list_series(engine).items()
+            if stype == 'primary'
+        ]
 
     categories = defaultdict(list)
 
     bar = tqdm.tqdm(range(len(series)))
     for name in series:
-        synth_idates = tsh.insertion_dates(engine, name)
-        has_upstream = tsh.upstream.exists(engine, name)
-        upstream_idates = (
-            has_upstream and
-            tsh.upstream.insertion_dates(engine, name) or
-            []
-        )
-        if synth_idates and not upstream_idates:
-            status = 'handcrafted'
-        elif len(synth_idates) == len(upstream_idates):
-            status = 'unsupervised'
-        else:
-            status = 'supervised'
-        categories[status].append(name)
-
         meta = tsh.metadata(engine, name)
+        if 'supervision_status' in meta:
+            continue
+
+        categories[status].append(name)
         meta['supervision_status'] = status
         with engine.begin() as cn:
             tsh.update_metadata(cn, name, meta, internal=True)

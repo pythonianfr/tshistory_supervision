@@ -13,7 +13,7 @@ setup(name='tshistory_supervision',
           'tshistory'
       ],
       entry_points={'tshistory.subcommands': [
-          'migrate-supervision-0.5-to-0.6=tshistory_supervision.cli:migrate_supervision_dot_5_to_dot_6',
+          'fix-supervision-status=tshistory_supervision.cli:fix_supervision_status',
           'list-supervised-series-mismatch=tshistory_supervision.cli:list_mismatch',
           'shell=tshistory_supervision.cli:shell'
       ]},
