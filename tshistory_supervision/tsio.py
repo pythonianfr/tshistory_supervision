@@ -80,6 +80,11 @@ class timeseries(basets):
                       __supermethod__=None,
                       __upmethod__=None):
 
+        if manual:
+            if metadata is None:
+                metadata = {}
+            metadata['edited'] = True
+
         if not self.exists(cn, name):
             # initial insert
             diff = __supermethod__(

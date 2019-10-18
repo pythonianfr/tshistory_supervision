@@ -5,6 +5,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
+from tshistory.util import _set_cache
 from tshistory.testutil import utcdt
 
 
@@ -275,6 +276,15 @@ def test_manual_update(engine, tsh):
 2010-01-06    3.0
 2010-01-09    4.0
 """, manual)
+
+    with engine.begin() as cn:
+        _set_cache(cn)
+        revs = tsh._revisions(
+            cn,
+            'ts_mixte',
+            qcallback=lambda q: q.where("cast(metadata ->> 'edited' as bool)")
+        )
+    assert [rid for rid, _ in revs] == [4, 6, 8, 9, 11]
 
 
 def test_manual_replace(engine, tsh):
