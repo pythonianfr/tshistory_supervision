@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from pytest_sa_pg import db
 
 from tshistory.schema import tsschema
+from tshistory import api
 
 from tshistory_supervision.tsio import timeseries
 
@@ -29,3 +30,20 @@ def engine(request):
 @pytest.fixture(scope='session')
 def tsh(request, engine):
     return timeseries()
+
+
+@pytest.fixture(scope='session')
+def mapi(engine):
+    tsschema('test-mapi').create(engine)
+    tsschema('test-mapi-upstream').create(engine)
+    tsschema('test-mapi-2').create(engine)
+    tsschema('test-mapi-2-upstream').create(engine)
+
+    return api.timeseries(
+        str(engine.url),
+        namespace='test-mapi',
+        handler=timeseries,
+        sources=[
+            (str(engine.url), 'test-mapi-2')
+        ]
+    )

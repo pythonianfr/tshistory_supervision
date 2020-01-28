@@ -7,6 +7,8 @@ from sqlalchemy.dialects.postgresql import BYTEA
 from tshistory.util import tx
 from tshistory.tsio import timeseries as basets
 
+from tshistory_supervision import api  # trigger registration
+
 
 def join_index(ts1, ts2):
     if ts1 is None and ts2 is None:
