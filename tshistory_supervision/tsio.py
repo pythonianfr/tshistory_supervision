@@ -4,7 +4,7 @@ import numpy as np
 from sqlalchemy import Column, Boolean, select, desc
 from sqlalchemy.dialects.postgresql import BYTEA
 
-from tshistory.util import tx
+from tshistory.util import tx, diff
 from tshistory.tsio import timeseries as basets
 
 from tshistory_supervision import api  # trigger registration
@@ -89,18 +89,18 @@ class timeseries(basets):
 
         if not self.exists(cn, name):
             # initial insert
-            diff = __supermethod__(
+            series_diff = __supermethod__(
                 cn, ts, name, author,
                 metadata=metadata,
                 insertion_date=insertion_date
             )
-            if diff is None:
+            if series_diff is None:
                 return
             # the super call create the initial meta, let's complete it
             meta = self.metadata(cn, name)
             meta['supervision_status'] = 'handcrafted' if manual else 'unsupervised'
             self.update_metadata(cn, name, meta, internal=True)
-            return diff
+            return series_diff
 
         supervision_status = self.supervision_status(cn, name)
 
@@ -128,10 +128,10 @@ class timeseries(basets):
 
         assert supervision_status in ('supervised', 'handcrafted')
         if manual:
-            diff = ts
+            series_diff = ts
         else:
             # insert & compute diff over upstream
-            diff = __upmethod__(
+            series_diff = __upmethod__(
                 cn, ts, name, author,
                 metadata=metadata,
                 insertion_date=insertion_date
@@ -143,12 +143,12 @@ class timeseries(basets):
                 meta['supervision_status'] = 'supervised'
                 self.update_metadata(cn, name, meta, internal=True)
 
-            if diff is None:
+            if series_diff is None:
                 return
 
         # insert the diff over upstream or the manual edit into edited
         a = __supermethod__(
-            cn, diff, name, author,
+            cn, series_diff, name, author,
             metadata=metadata,
             insertion_date=insertion_date
         )
@@ -217,7 +217,7 @@ class timeseries(basets):
             to_value_date=to_value_date,
             _keep_nans=True
         )
-        manual = self.diff(upstream, edited)
+        manual = diff(upstream, edited)
 
         manual.name = name
         return manual
@@ -257,7 +257,7 @@ class timeseries(basets):
             to_value_date=to_value_date,
             _keep_nans=True
         )
-        manual = self.diff(upstream, edited)
+        manual = diff(upstream, edited)
 
         unionindex = join_index(upstream, manual)
         if unionindex is None:
