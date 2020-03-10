@@ -29,17 +29,14 @@ documentation.
 An override is made as follows:
 
 ```python
- >>> tsh.insert(engine, series, 'my_series', 'analyst@corp.com', manual=True)
+ >>> tsa.update('my-series', series, 'analyst@corp.com', manual=True)
 ```
 
 Inserted values will show up in the next `.get` call.
 
 Specific API calls exist to provide a standard workflow:
 
-* `.get_overrides` returns a series of all the manual (and still
-  *current*) insertions
-
-* `.get_ts_marker` returns a couple *series* and *markers* where
+* `.edited` returns a couple *series* and *markers* where
   *series* is like the output of a standard `.get` call and *markers*
   a boolean series indicating whether any data point is from
   *upstream* or a manual edition.
