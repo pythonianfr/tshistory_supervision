@@ -32,6 +32,8 @@ An override is made as follows:
  >>> tsa.update('my-series', series, 'analyst@corp.com', manual=True)
 ```
 
+This also works with the `replace` api call.
+
 Inserted values will show up in the next `.get` call.
 
 Specific API calls exist to provide a standard workflow:
@@ -41,3 +43,7 @@ Specific API calls exist to provide a standard workflow:
   a boolean series indicating whether any data point is from
   *upstream* or a manual edition.
 
+The series metadata grows a new *supervision-status* attribute, whose
+value can be one of `unsupervised`, `supervised` and `hand-crafted`.
+
+Hand-crafted is for series that are entirely made of `manual` updates.
