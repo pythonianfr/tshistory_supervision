@@ -19,7 +19,7 @@ The central use case is as follows:
 * the complete series history must retain information on the
   supervision activity
 
-[tshistory]: https://bitbucket.org/pythonian/tshistory
+[tshistory]: https://hg.sr.ht/~pythonian/tshistory
 
 # Usage
 
