@@ -38,7 +38,7 @@ def make_api(engine, ns, sources=()):
 
     return api.timeseries(
         str(engine.url),
-        namespace='test-api',
+        namespace=ns,
         handler=timeseries,
         sources=sources
     )
@@ -47,3 +47,20 @@ def make_api(engine, ns, sources=()):
 @pytest.fixture(scope='session')
 def tsa(engine):
     return make_api(engine, 'test-api')
+
+
+@pytest.fixture(scope='session')
+def tsa1(engine):
+    return make_api(
+        engine,
+        'test-api-2',
+        [(str(engine.url), 'test-remote')]
+    )
+
+
+@pytest.fixture(scope='session')
+def tsa2(engine):
+    return make_api(
+        engine,
+        'test-remote'
+    )
