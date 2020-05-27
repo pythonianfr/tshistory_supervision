@@ -10,6 +10,8 @@ def test_multi_source_handcrafted(mapi):
     )
     mapi.update('multi-local', series, 'test', manual=True)
 
+    assert mapi.supervision_status('multi-local') == 'handcrafted'
+
     assert_df("""
 2020-01-01    1.0
 2020-01-02    2.0
@@ -44,6 +46,7 @@ def test_multi_source_edited(mapi):
         index=pd.date_range(pd.Timestamp('2020-1-1'), freq='D', periods=3)
     )
     mapi.update('multi-local2', series, 'test')
+    assert mapi.supervision_status('multi-local') == 'supervised'
 
     assert_df("""
 2020-01-01    1.0

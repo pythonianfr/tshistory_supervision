@@ -22,3 +22,10 @@ def edited(self, name,
         to_value_date=to_value_date
     )
 
+
+@extend(dbtimeseries)
+def supervision_status(self, name):
+    return self.tsh.supervision_status(
+        self.engine,
+        name
+    )
