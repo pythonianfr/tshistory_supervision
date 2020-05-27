@@ -32,18 +32,18 @@ def tsh(request, engine):
     return timeseries()
 
 
-@pytest.fixture(scope='session')
-def mapi(engine):
-    tsschema('test-mapi').create(engine)
-    tsschema('test-mapi-upstream').create(engine)
-    tsschema('test-mapi-2').create(engine)
-    tsschema('test-mapi-2-upstream').create(engine)
+def make_api(engine, ns, sources=()):
+    tsschema(ns).create(engine)
+    tsschema(ns + '-upstream').create(engine)
 
     return api.timeseries(
         str(engine.url),
-        namespace='test-mapi',
+        namespace='test-api',
         handler=timeseries,
-        sources=[
-            (str(engine.url), 'test-mapi-2')
-        ]
+        sources=sources
     )
+
+
+@pytest.fixture(scope='session')
+def tsa(engine):
+    return make_api(engine, 'test-api')
