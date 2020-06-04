@@ -6,11 +6,10 @@ import pandas as pd
 import numpy as np
 
 from tshistory.util import _set_cache
-from tshistory.testutil import utcdt
-
-
-def assert_df(expected, df):
-    assert expected.strip() == df.to_string().strip()
+from tshistory.testutil import (
+    assert_df,
+    utcdt
+)
 
 
 def genserie(start, freq, repeat, initval=None, tz=None, name=None):
