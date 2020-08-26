@@ -513,7 +513,7 @@ def test_na_and_delete(engine, tsh):
     ts_repushed[0:3] = np.nan
     tsh.update(engine, ts_repushed, 'ts_repushed', 'test')
     diff = tsh.update(engine, ts_repushed, 'ts_repushed', 'test')
-    assert diff is None
+    assert len(diff) == 0
 
 
 def test_exotic_name(engine, tsh):
