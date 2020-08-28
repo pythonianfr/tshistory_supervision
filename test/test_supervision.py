@@ -577,6 +577,5 @@ def test_serie_deletion(engine, tsh):
 
 def test_create_empty_series(engine, tsh):
     ts = pd.Series(dtype='float64')
-    with pytest.raises(TypeError):
-        tsh.update(engine, ts, 'empty', 'Babar')
-
+    tsh.update(engine, ts, 'empty', 'Babar')
+    # did not fail :)

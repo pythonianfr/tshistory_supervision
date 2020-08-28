@@ -94,8 +94,8 @@ class timeseries(basets):
                 metadata=metadata,
                 insertion_date=insertion_date
             )
-            if series_diff is None:
-                return
+            if series_diff is None or not len(series_diff):
+                return series_diff
             # the super call create the initial meta, let's complete it
             meta = self.metadata(cn, name)
             meta['supervision_status'] = 'handcrafted' if manual else 'unsupervised'
