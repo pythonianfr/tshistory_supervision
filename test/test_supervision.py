@@ -573,3 +573,10 @@ def test_serie_deletion(engine, tsh):
 
     testit(tsh)
     testit(tsh.upstream)
+
+
+def test_create_empty_series(engine, tsh):
+    ts = pd.Series(dtype='float64')
+    with pytest.raises(TypeError):
+        tsh.update(engine, ts, 'empty', 'Babar')
+
