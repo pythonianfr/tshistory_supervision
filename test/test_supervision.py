@@ -504,8 +504,8 @@ def test_before_first_insertion(engine, tsh):
     result = tsh.get_ts_marker(engine, 'unknown_ts')
     assert (None, None) == result
 
-    result = tsh.get_ts_marker(engine, 'ts_shtroumpf', revision_date=datetime(1970, 1, 1))
-    assert (None, None) == result
+    a, b = tsh.get_ts_marker(engine, 'ts_shtroumpf', revision_date=datetime(1970, 1, 1))
+    assert len(a) == len(b) == 0
 
 
 def test_na_and_delete(engine, tsh):

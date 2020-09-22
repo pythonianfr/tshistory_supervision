@@ -10,7 +10,7 @@ setup(name='tshistory_supervision',
 
       packages=['tshistory_supervision'],
       install_requires=[
-          'tshistory'
+          'tshistory >= 0.12.2'
       ],
       entry_points={'tshistory.subcommands': [
           'fix-supervision-status=tshistory_supervision.cli:fix_supervision_status',
