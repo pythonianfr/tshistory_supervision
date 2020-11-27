@@ -506,6 +506,7 @@ def test_before_first_insertion(engine, tsh):
 
     a, b = tsh.get_ts_marker(engine, 'ts_shtroumpf', revision_date=datetime(1970, 1, 1))
     assert len(a) == len(b) == 0
+    assert b.dtype == np.dtype('bool')
 
 
 def test_na_and_delete(engine, tsh):

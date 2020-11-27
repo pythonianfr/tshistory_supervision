@@ -244,7 +244,8 @@ class timeseries(basets):
         if supervision in ('unsupervised', 'handcrafted'):
             flags = pd.Series(
                 [supervision == 'handcrafted'] * len(edited.index),
-                index=edited.index
+                index=edited.index,
+                dtype=np.dtype('bool')
             )
             flags.name = name
             return edited.dropna(), flags
