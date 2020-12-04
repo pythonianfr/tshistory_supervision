@@ -49,6 +49,7 @@ def fix_supervision_status(dburi, name=None, namespace='tsh'):
         if 'supervision_status' in meta:
             continue
 
+        status = compute_supervision_status(tsh, engine, name)
         categories[status].append(name)
         meta['supervision_status'] = status
         with engine.begin() as cn:
