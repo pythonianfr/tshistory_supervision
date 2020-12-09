@@ -5,7 +5,7 @@ import pytest
 import pandas as pd
 import numpy as np
 
-from tshistory.util import _set_cache
+from tshistory.util import _set_cache, empty_series
 from tshistory.testutil import (
     assert_df,
     utcdt
@@ -577,6 +577,6 @@ def test_serie_deletion(engine, tsh):
 
 
 def test_create_empty_series(engine, tsh):
-    ts = pd.Series(dtype='float64')
+    ts = empty_series(False)
     tsh.update(engine, ts, 'empty', 'Babar')
     # did not fail :)
