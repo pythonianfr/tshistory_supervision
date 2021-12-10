@@ -10,7 +10,7 @@ from tshistory.schema import tsschema
 from tshistory import api
 from tshistory.testutil import make_tsx
 
-from tshistory_rest import app, util
+from tshistory.http import app, util
 from tshistory_supervision import http
 from tshistory_supervision.tsio import timeseries
 
