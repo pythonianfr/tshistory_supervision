@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name='tshistory_supervision',
-      version='0.9.2',
+      version='0.10.0',
       author='Pythonian',
       author_email='aurelien.campeas@pythonian.fr, arnaud.campeas@pythonian.fr',
       url='https://hg.sr.ht/~pythonian/tshistory_supervision',
@@ -10,7 +10,7 @@ setup(name='tshistory_supervision',
 
       packages=['tshistory_supervision'],
       install_requires=[
-          'tshistory >= 0.12.3'
+          'tshistory >= 0.14.0'
       ],
       entry_points={'tshistory.subcommands': [
           'fix-supervision-status=tshistory_supervision.cli:fix_supervision_status',
