@@ -1,11 +1,11 @@
 from tshistory.util import extend
 from tshistory.api import (
     altsources,
-    dbtimeseries
+    mainsource
 )
 
 
-@extend(dbtimeseries)
+@extend(mainsource)
 def edited(self, name,
            revision_date=None,
            from_value_date=None,
@@ -49,7 +49,7 @@ def edited(self, name,
     )
 
 
-@extend(dbtimeseries)
+@extend(mainsource)
 def supervision_status(self, name):
     with self.engine.begin() as cn:
         if self.tsh.exists(cn, name):
