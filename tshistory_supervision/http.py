@@ -1,6 +1,5 @@
 import pandas as pd
 
-import requests
 from flask import make_response
 
 from flask_restx import (
@@ -127,7 +126,7 @@ class SupervisionClient(Client):
             args['from_value_date'] = strft(from_value_date)
         if to_value_date:
             args['to_value_date'] = strft(to_value_date)
-        res = requests.get(
+        res = self.session.get(
             f'{self.uri}/series/supervision', params=args
         )
         if res.status_code == 404:
