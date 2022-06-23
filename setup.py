@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(name='tshistory_supervision',
-      version='0.10.0',
+      version='0.10.1',
       author='Pythonian',
       author_email='aurelien.campeas@pythonian.fr, arnaud.campeas@pythonian.fr',
       url='https://hg.sr.ht/~pythonian/tshistory_supervision',
