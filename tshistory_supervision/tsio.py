@@ -70,7 +70,7 @@ class timeseries(basets):
         self.upstream = basets(namespace='{}-upstream'.format(self.namespace))
 
     def supervision_status(self, cn, name):
-        meta = self.metadata(cn, name)
+        meta = self.internal_metadata(cn, name)
         if meta:
             return meta.get('supervision_status', 'unsupervised')
         return 'unsupervised'
@@ -97,9 +97,10 @@ class timeseries(basets):
             if series_diff is None or not len(series_diff):
                 return series_diff
             # the super call create the initial meta, let's complete it
-            meta = self.metadata(cn, name)
-            meta['supervision_status'] = 'handcrafted' if manual else 'unsupervised'
-            self.update_metadata(cn, name, meta, internal=True)
+            meta = {
+                'supervision_status': 'handcrafted' if manual else 'unsupervised'
+            }
+            self.update_internal_metadata(cn, name, meta)
             return series_diff
 
         supervision_status = self.supervision_status(cn, name)
@@ -116,9 +117,9 @@ class timeseries(basets):
                     insertion_date=insertion_date
                 )
                 # update supervision status
-                meta = self.metadata(cn, name)
-                meta['supervision_status'] = 'supervised'
-                self.update_metadata(cn, name, meta, internal=True)
+                meta = {'supervision_status': 'supervised'}
+                self.update_internal_metadata(cn, name, meta)
+
             # now insert what we got
             return __supermethod__(
                 cn, ts, name, author,
@@ -139,9 +140,8 @@ class timeseries(basets):
 
             if supervision_status == 'handcrafted':
                 # update supervision status
-                meta = self.metadata(cn, name)
-                meta['supervision_status'] = 'supervised'
-                self.update_metadata(cn, name, meta, internal=True)
+                meta = {'supervision_status': 'supervised'}
+                self.update_internal_metadata(cn, name, meta)
 
             if series_diff is None:
                 return
