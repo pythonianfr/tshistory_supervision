@@ -1,3 +1,7 @@
+from typing import Optional, Tuple
+
+import pandas as pd
+
 from tshistory.util import extend
 from tshistory.api import (
     altsources,
@@ -6,13 +10,14 @@ from tshistory.api import (
 
 
 @extend(mainsource)
-def edited(self, name,
-           revision_date=None,
-           from_value_date=None,
-           to_value_date=None):
+def edited(self, name: str,
+           revision_date: Optional[pd.Timestamp]=None,
+           from_value_date: Optional[pd.Timestamp]=None,
+           to_value_date: Optional[pd.Timestamp]=None) -> Tuple[pd.Series, pd.Series]:
     """
-    returns the base series and a second boolean series whose entries
-    indicate if an override has been made or not
+    Returns the base series and a second boolean series whose entries
+    indicate if an override has been made or not.
+
     """
     with self.engine.begin() as cn:
         if self.tsh.exists(cn, name):
@@ -33,7 +38,8 @@ def edited(self, name,
 
 
 @extend(altsources)
-def edited(self, name,
+def edited(self,
+           name,
            revision_date=None,
            from_value_date=None,
            to_value_date=None):
@@ -50,7 +56,11 @@ def edited(self, name,
 
 
 @extend(mainsource)
-def supervision_status(self, name):
+def supervision_status(self, name: str) -> str:
+    """
+    Returns the supervision status of a series.
+    Possible values are `unsupervised`, `handcrafted` and `supervised`.
+    """
     with self.engine.begin() as cn:
         if self.tsh.exists(cn, name):
             return self.tsh.supervision_status(
