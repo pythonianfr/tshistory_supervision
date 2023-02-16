@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 
 from sqlalchemy import Column, Boolean, select, desc
-from sqlalchemy.dialects.postgresql import BYTEA
 
 from tshistory.util import tx, diff
 from tshistory.tsio import timeseries as basets
