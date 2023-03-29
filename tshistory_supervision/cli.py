@@ -53,7 +53,7 @@ def fix_supervision_status(dburi, name=None, namespace='tsh'):
         categories[status].append(name)
         meta['supervision_status'] = status
         with engine.begin() as cn:
-            tsh.update_metadata(cn, name, meta, internal=True)
+            tsh.replace_metadata(cn, name, meta, internal=True)
 
             # reclaim space
             if status in ('handcrafted', 'unsupervised'):
