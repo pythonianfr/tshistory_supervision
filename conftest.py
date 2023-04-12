@@ -35,7 +35,7 @@ def tsh(request, engine):
     return timeseries()
 
 
-def make_api(engine, ns, sources=()):
+def make_api(engine, ns, sources={}):
     tsschema(ns).create(engine)
     tsschema(ns + '-upstream').create(engine)
 
@@ -57,7 +57,7 @@ def tsa1(engine):
     return make_api(
         engine,
         'test-api-2',
-        [(str(engine.url), 'test-remote')]
+        {'remote': (str(engine.url), 'test-remote')}
     )
 
 
@@ -84,7 +84,7 @@ def client(engine):
     tsa = make_api(
         engine,
         'tsh',
-        [(DBURI, 'other')]
+        {'other': (DBURI, 'other')}
     )
     wsgi = app.make_app(tsa, http.supervision_httpapi)
     yield WebTester(wsgi)
