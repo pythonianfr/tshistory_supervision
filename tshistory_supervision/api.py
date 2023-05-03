@@ -38,7 +38,7 @@ def edited(self, name: str,
 
 
 @extend(altsources)
-def edited(self,
+def edited(self,  # noqa: F811
            name,
            revision_date=None,
            from_value_date=None,
@@ -72,7 +72,7 @@ def supervision_status(self, name: str) -> str:
 
 
 @extend(altsources)
-def supervision_status(self, name):
+def supervision_status(self, name):  # noqa: F811
     source = self._findsourcefor(name)
     if source is None:
         return

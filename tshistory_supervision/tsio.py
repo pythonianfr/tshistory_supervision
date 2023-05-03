@@ -4,7 +4,7 @@ import numpy as np
 from tshistory.util import tx, diff
 from tshistory.tsio import timeseries as basets
 
-from tshistory_supervision import api  # trigger registration
+from tshistory_supervision import api  # trigger registration  # noqa: F401
 
 
 def join_index(ts1, ts2):

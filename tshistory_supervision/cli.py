@@ -91,7 +91,7 @@ def list_mismatch(db_uri, namespace='tsh'):
 @click.argument('db-uri')
 @click.option('--namespace', default='tsh')
 def shell(db_uri, namespace='tsh'):
-    e = create_engine(find_dburi(db_uri))
+    e = create_engine(find_dburi(db_uri))  # noqa: F841
 
-    tsh = timeseries(namespace)
+    tsh = timeseries(namespace)  # noqa: F841
     import pdb; pdb.set_trace()
