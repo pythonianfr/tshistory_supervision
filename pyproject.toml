@@ -1,2 +1,6 @@
 [tool.pytype]
 inputs = ['tshistory_supervision']
+
+
+[tool.ruff]
+ignore = ["E501", "E702", "E722", "E731"]
