@@ -138,5 +138,5 @@ class SupervisionClient(Client):
 
     @unwraperror
     def supervision_status(self, name):
-        meta = self.metadata(name, all=True)
+        meta = self.internal_metadata(name)
         return meta.get('supervision_status', 'unknown')

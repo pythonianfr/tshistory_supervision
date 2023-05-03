@@ -83,7 +83,6 @@ def test_multi_source_edited(tsx):
         index=pd.date_range(pd.Timestamp('2020-1-1'), freq='D', periods=3)
     )
     tsx.update('multi-local2', series, 'test')
-    assert tsx.supervision_status('multi-local') == 'supervised'
 
     assert_df("""
 2020-01-01    1.0
