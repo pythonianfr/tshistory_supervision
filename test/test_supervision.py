@@ -1,4 +1,3 @@
-from pathlib import Path
 from datetime import datetime
 import pytest
 
@@ -408,10 +407,9 @@ def test_strip(engine, tsh):
         insertion_date=utcdt(2019, 1, 2)
     )
 
-    with pytest.raises(ValueError) as err:
+    with pytest.raises(ValueError):
         csid = tsh.changeset_at(engine, 'strip-supervised', utcdt(2019, 1, 1))
         tsh.strip(engine, 'strip-supervised', csid)
-
 
 
 def test_handcrafted(engine, tsh):

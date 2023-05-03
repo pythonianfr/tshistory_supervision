@@ -120,7 +120,7 @@ def test_multi_source_edited(tsx):
 """, marker)
 
 
-def test_multi_source_edited(tsa1, tsa2):
+def test_multi_source_edited2(tsa1, tsa2):
     series = pd.Series(
         [1, 2, 3],
         index=pd.date_range(pd.Timestamp('2020-1-1'), freq='D', periods=3)

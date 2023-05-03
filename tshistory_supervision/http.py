@@ -52,7 +52,6 @@ class supervision_httpapi(httpapi):
         tsa = self.tsa
         api = self.api
         nss = self.nss
-        nsg = self.nsg
 
         @nss.route('/supervision')
         class series_supervision(Resource):

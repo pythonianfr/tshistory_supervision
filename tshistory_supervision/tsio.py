@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 
-from sqlalchemy import Column, Boolean, select, desc
-
 from tshistory.util import tx, diff
 from tshistory.tsio import timeseries as basets
 

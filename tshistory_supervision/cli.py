@@ -1,7 +1,6 @@
 import click
 
 import tqdm
-import pandas as pd
 from sqlalchemy import create_engine
 from tshistory.util import find_dburi
 from collections import defaultdict
