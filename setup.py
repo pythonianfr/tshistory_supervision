@@ -1,8 +1,10 @@
 from setuptools import setup
 
+from tshistory_supervision import __version__
+
 
 setup(name='tshistory_supervision',
-      version='0.11.0',
+      version=__version__,
       author='Pythonian',
       author_email='aurelien.campeas@pythonian.fr, arnaud.campeas@pythonian.fr',
       url='https://hg.sr.ht/~pythonian/tshistory_supervision',
