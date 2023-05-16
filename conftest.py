@@ -6,11 +6,14 @@ from sqlalchemy import create_engine
 from pytest_sa_pg import db
 import webtest
 
+from dbcache import api as kvapi
+
 from tshistory.schema import tsschema
 from tshistory import api
 from tshistory.testutil import make_tsx
-
 from tshistory.http import app
+
+from tshistory_supervision import __version__
 from tshistory_supervision import http
 from tshistory_supervision.tsio import timeseries
 
@@ -22,22 +25,32 @@ DBURI = 'postgresql://localhost:5434/postgres'
 @pytest.fixture(scope='session')
 def engine(request):
     db.setup_local_pg_cluster(request, DATADIR, 5434)
-    sch1 = tsschema()
-    sch2 = tsschema('tsh-upstream')
     e = create_engine(DBURI)
-    sch1.create(e)
-    sch2.create(e)
+    tsschema().create(e)
+    tsschema('tsh-upstream').create(e)
+
     yield e
+
+
+def make_kvstore(engine, ns):
+    ns = f'{ns}-kvstore'
+    kvstore = kvapi.kvstore(str(engine.url), namespace=ns)
+    kvstore.set('tshistory-supervision-version', __version__)
 
 
 @pytest.fixture(scope='session')
 def tsh(request, engine):
+    # kvstore
     return timeseries()
 
 
 def make_api(engine, ns, sources={}):
     tsschema(ns).create(engine)
     tsschema(ns + '-upstream').create(engine)
+
+    make_kvstore(engine, ns)
+    for _, sns in sources.values():
+        make_kvstore(engine, sns)
 
     return api.timeseries(
         str(engine.url),

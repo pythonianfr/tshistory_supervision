@@ -22,7 +22,6 @@ def run_migrations(engine, namespace, interactive=False):
         # first time
         from tshistory_supervision import __version__ as known_version
         store = dbapi.kvstore(str(engine.url), namespace=storens)
-        store.set('tshistory-version', known_version)
         # we probably want to go further
         initial_migration(engine, namespace, interactive)
         store.set('tshistory-supervision-version', known_version)
