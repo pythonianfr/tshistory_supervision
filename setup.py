@@ -14,11 +14,16 @@ setup(name='tshistory_supervision',
       install_requires=[
           'tshistory >= 0.18.0'
       ],
-      entry_points={'tshistory.subcommands': [
-          'fix-supervision-status=tshistory_supervision.cli:fix_supervision_status',
-          'list-supervised-series-mismatch=tshistory_supervision.cli:list_mismatch',
-          'shell=tshistory_supervision.cli:shell'
-      ]},
+      entry_points={
+          'tshistory.subcommands': [
+              'fix-supervision-status=tshistory_supervision.cli:fix_supervision_status',
+              'list-supervised-series-mismatch=tshistory_supervision.cli:list_mismatch',
+              'shell=tshistory_supervision.cli:shell'
+          ],
+          'tshistory.migrate.run_migrations': [
+              'run_migrations=tshistory_supervision.migrate:run_migrations'
+          ]
+      },
       classifiers=[
           'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
