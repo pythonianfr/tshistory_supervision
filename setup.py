@@ -20,8 +20,8 @@ setup(name='tshistory_supervision',
               'list-supervised-series-mismatch=tshistory_supervision.cli:list_mismatch',
               'shell=tshistory_supervision.cli:shell'
           ],
-          'tshistory.migrate.run_migrations': [
-              'run_migrations=tshistory_supervision.migrate:run_migrations'
+          'tshistory.migrate.Migrator': [
+              'migrator=tshistory_supervision.migrate:Migrator'
           ]
       },
       classifiers=[
