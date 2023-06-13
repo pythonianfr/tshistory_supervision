@@ -85,13 +85,3 @@ def list_mismatch(db_uri, namespace='tsh'):
     for name in sorted(diff):
         assert (False, True) == (tsh.exists(e, name), tsh.upstream.exists(e, name))
         print(name)
-
-
-@click.command(name='shell')
-@click.argument('db-uri')
-@click.option('--namespace', default='tsh')
-def shell(db_uri, namespace='tsh'):
-    e = create_engine(find_dburi(db_uri))  # noqa: F841
-
-    tsh = timeseries(namespace)  # noqa: F841
-    import pdb; pdb.set_trace()

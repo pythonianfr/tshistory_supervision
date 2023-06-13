@@ -17,8 +17,7 @@ setup(name='tshistory_supervision',
       entry_points={
           'tshistory.subcommands': [
               'fix-supervision-status=tshistory_supervision.cli:fix_supervision_status',
-              'list-supervised-series-mismatch=tshistory_supervision.cli:list_mismatch',
-              'shell=tshistory_supervision.cli:shell'
+              'list-supervised-series-mismatch=tshistory_supervision.cli:list_mismatch'
           ],
           'tshistory.migrate.Migrator': [
               'migrator=tshistory_supervision.migrate:Migrator'
