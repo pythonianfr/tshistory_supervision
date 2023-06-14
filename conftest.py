@@ -1,8 +1,7 @@
 from pathlib import Path
+
 import pytest
-
 from sqlalchemy import create_engine
-
 from pytest_sa_pg import db
 import webtest
 
@@ -15,6 +14,7 @@ from tshistory.http import app
 
 from tshistory_supervision import __version__
 from tshistory_supervision import http
+from tshistory_supervision.testutil import with_http_bridge
 from tshistory_supervision.tsio import timeseries
 
 
@@ -113,5 +113,6 @@ tsx = make_tsx(
     _initschema,
     timeseries,
     http.supervision_httpapi,
-    http.SupervisionClient
+    http.SupervisionClient,
+    with_http_bridge=with_http_bridge
 )
