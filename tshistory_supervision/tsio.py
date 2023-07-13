@@ -51,6 +51,7 @@ class timeseries(basets):
     upstream series.
 
     """
+    index = 1
     metakeys = {
         'tzaware',
         'index_type',

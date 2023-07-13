@@ -21,6 +21,9 @@ setup(name='tshistory_supervision',
           ],
           'tshistory.migrate.Migrator': [
               'migrator=tshistory_supervision.migrate:Migrator'
+          ],
+          'tshclass': [
+              'tshclass=tshistory_supervision.tsio:timeseries'
           ]
       },
       classifiers=[
