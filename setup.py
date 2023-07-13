@@ -24,6 +24,9 @@ setup(name='tshistory_supervision',
           ],
           'tshclass': [
               'tshclass=tshistory_supervision.tsio:timeseries'
+          ],
+          'httpclient': [
+              'httpclient=tshistory_supervision.http:supervision_httpclient'
           ]
       },
       classifiers=[

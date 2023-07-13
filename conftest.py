@@ -113,6 +113,6 @@ tsx = make_tsx(
     _initschema,
     timeseries,
     http.supervision_httpapi,
-    http.SupervisionClient,
+    http.supervision_httpclient,
     with_http_bridge=with_http_bridge
 )

@@ -9,7 +9,7 @@ from flask_restx import (
 from tshistory import util
 
 from tshistory.http.client import (
-    Client,
+    httpclient,
     strft,
     unwraperror
 )
@@ -105,7 +105,7 @@ class supervision_httpapi(httpapi):
                 return response
 
 
-class SupervisionClient(Client):
+class supervision_httpclient(httpclient):
 
     def __repr__(self):
         return f"tshistory-supervision-http-client(uri='{self.uri}')"
