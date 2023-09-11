@@ -106,6 +106,7 @@ class supervision_httpapi(httpapi):
 
 
 class supervision_httpclient(httpclient):
+    index = 0.5
 
     def __repr__(self):
         return f"tshistory-supervision-http-client(uri='{self.uri}')"
