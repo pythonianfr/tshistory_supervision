@@ -10,7 +10,6 @@ from tshistory import api
 from tshistory.testutil import make_tsx
 from tshistory.http import app
 
-from tshistory_supervision import __version__
 from tshistory_supervision.schema import supervision_schema
 from tshistory_supervision import http
 from tshistory_supervision.testutil import with_http_bridge
