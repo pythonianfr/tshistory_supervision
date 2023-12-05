@@ -17,7 +17,7 @@ def test_supervision_json(client):
         'series': util.tojson(series),
         'author': 'Babar',
         'insertion_date': utcdt(2020, 1, 1, 10),
-        'tzaware': util.tzaware_serie(series)
+        'tzaware': util.tzaware_series(series)
     })
 
     series[-1] = 42
@@ -27,7 +27,7 @@ def test_supervision_json(client):
         'author': 'Babar',
         'insertion_date': utcdt(2020, 1, 1, 11),
         'supervision': json.dumps(True),
-        'tzaware': util.tzaware_serie(series)
+        'tzaware': util.tzaware_series(series)
     })
 
     res = client.get('/series/supervision?name=test-edited')
