@@ -23,4 +23,5 @@ tasks:
       export PATH=$PATH:~/.local/bin:/usr/lib/postgresql/15/bin
       pip3 install pytest pytest_sa_pg responses ruff
       cd tshistory_supervision
+      ruff check .
       pytest
