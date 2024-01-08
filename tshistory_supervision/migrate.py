@@ -8,7 +8,7 @@ from tshistory_supervision import __version__
 
 class Migrator(_Migrator):
     _order = 1
-    _known_version = __version__
+    _package_version = __version__
     _package = 'tshistory-supervision'
 
     def initial_migration(self):
