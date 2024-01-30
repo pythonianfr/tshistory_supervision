@@ -84,3 +84,69 @@ def test_supervision(tsx):
 2020-01-02 00:00:00+00:00    False
 2020-01-03 00:00:00+00:00     True
 """, markers)
+
+
+def test_get_by_horizon(client):
+    ts = genserie(utcdt(2023, 1, 1), 'D', 60)
+    client.patch('/series/state', params={
+        'name': 'horizon',
+        'series': util.tojson(ts),
+        'author': 'Babar',
+        'insertion_date': utcdt(2023, 1, 1),
+        'tzaware': util.tzaware_series(ts),
+        'supervision': json.dumps(False),
+    })
+
+    res = client.get('/series/supervision', params={
+        'name': 'horizon',
+        'horizon': (
+            '(horizon #:date (date "2023-2-1")'
+            '         #:offset 0'
+            '         #:past (delta #:days -2) '
+            '         #:future (delta #:days 1))'
+        )
+    })
+    assert res.json == {
+        '2023-01-30T00:00:00.000Z': {'markers': False, 'series': 29.0},
+        '2023-01-31T00:00:00.000Z': {'markers': False, 'series': 30.0},
+        '2023-02-01T00:00:00.000Z': {'markers': False, 'series': 31.0},
+        '2023-02-02T00:00:00.000Z': {'markers': False, 'series': 32.0}
+    }
+    df = pd.read_json(res.text, orient='index')
+    ts = df['series']
+    ts[-1] = 42
+
+    client.patch('/series/state', params={
+        'name': 'horizon',
+        'series': util.tojson(ts),
+        'author': 'Babar',
+        'insertion_date': utcdt(2023, 1, 1, 1),
+        'tzaware': util.tzaware_series(ts),
+        'supervision': json.dumps(True),
+    })
+
+    res = client.get('/series/supervision', params={
+        'name': 'horizon',
+        'horizon': (
+            '(horizon #:date (date "2023-2-1")'
+            '         #:offset 0'
+            '         #:past (delta #:days -2) '
+            '         #:future (delta #:days 1))'
+        ),
+        'format': 'tshpack'
+    })
+    ts, marker = util.unpack_many_series(res.body)
+
+    assert_df("""
+2023-01-30 00:00:00+00:00    29.0
+2023-01-31 00:00:00+00:00    30.0
+2023-02-01 00:00:00+00:00    31.0
+2023-02-02 00:00:00+00:00    42.0
+""", ts)
+
+    assert_df("""
+2023-01-30 00:00:00+00:00    False
+2023-01-31 00:00:00+00:00    False
+2023-02-01 00:00:00+00:00    False
+2023-02-02 00:00:00+00:00     True
+""", marker)

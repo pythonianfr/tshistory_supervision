@@ -1,4 +1,5 @@
 import pandas as pd
+from psyl import lisp
 
 from flask import make_response
 
@@ -19,6 +20,8 @@ from tshistory.http.util import (
     onerror,
     utcdt
 )
+from tshistory.http.horizon import OPERATORS
+
 
 base = reqparse.RequestParser()
 base.add_argument(
@@ -41,6 +44,10 @@ edited.add_argument(
 )
 edited.add_argument(
     'format', type=enum('json', 'tshpack'), default='json'
+)
+edited.add_argument(
+    'horizon', type=str, default=None,
+    help='override from/to_value_date'
 )
 
 
@@ -66,11 +73,23 @@ class supervision_httpapi(httpapi):
                     if tsa.formula(args.name):
                         api.abort(404, f'`{args.name}` is a formula')
 
+                # handle the horizon parameter
+                fvd = args.from_value_date
+                tvd = args.to_value_date
+                hz = args.get('horizon')
+                if hz:
+                    env = lisp.Env(OPERATORS)
+                    try:
+                        horizon = lisp.evaluate(hz, env)
+                    except:
+                        api.abort(400, f'bad horizon expression for `{args.name}`')
+                    fvd = horizon.past
+                    tvd = horizon.future
                 series, markers = tsa.edited(
                     args.name,
                     revision_date=args.insertion_date,
-                    from_value_date=args.from_value_date,
-                    to_value_date=args.to_value_date,
+                    from_value_date=fvd,
+                    to_value_date=tvd,
                 )
                 metadata = tsa.metadata(args.name, all=True)
                 assert metadata is not None, f'series {args.name} has no metadata'
