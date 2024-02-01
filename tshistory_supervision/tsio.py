@@ -222,7 +222,8 @@ class timeseries(basets):
 
     @tx
     def get_ts_marker(self, cn, name, revision_date=None,
-                      from_value_date=None, to_value_date=None):
+                      from_value_date=None, to_value_date=None,
+                      _keep_nans=False):
         table = self._series_to_tablename(cn, name)
         if table is None:
             return None, None
@@ -271,4 +272,6 @@ class timeseries(basets):
             mask_manual[manual.index] = True
             mask_manual.name = name
 
-        return edited.dropna(), mask_manual
+        if not _keep_nans:
+            edited = edited.dropna()
+        return edited, mask_manual

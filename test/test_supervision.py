@@ -493,6 +493,23 @@ def test_more_manual(engine, tsh):
 2015-01-05     True
 """, marker)
 
+    ts_marker, marker = tsh.get_ts_marker(engine, 'ts_exp1', _keep_nans=True)
+    assert not ts_marker.equals(ts_get)
+    assert_df("""
+2015-01-01    False
+2015-01-02    False
+2015-01-03     True
+2015-01-04     True
+2015-01-05     True
+""", marker)
+    assert_df("""
+2015-01-01    0.0
+2015-01-02    1.0
+2015-01-03   -3.0
+2015-01-04   -3.0
+2015-01-05    NaN
+""", ts_marker)
+
 
 def test_before_first_insertion(engine, tsh):
     tsh.update(engine, genserie(datetime(2010, 1, 1), 'D', 11), 'ts_shtroumpf', 'test')
