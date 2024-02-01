@@ -13,7 +13,8 @@ from tshistory.api import (
 def edited(self, name: str,
            revision_date: Optional[pd.Timestamp]=None,
            from_value_date: Optional[pd.Timestamp]=None,
-           to_value_date: Optional[pd.Timestamp]=None) -> Tuple[pd.Series, pd.Series]:
+           to_value_date: Optional[pd.Timestamp]=None,
+           _keep_nans: bool=False) -> Tuple[pd.Series, pd.Series]:
     """
     Returns the base series and a second boolean series whose entries
     indicate if an override has been made or not.
@@ -26,14 +27,16 @@ def edited(self, name: str,
                 name,
                 revision_date=revision_date,
                 from_value_date=from_value_date,
-                to_value_date=to_value_date
+                to_value_date=to_value_date,
+                _keep_nans=_keep_nans
             )
 
     return self.othersources.edited(
         name,
         revision_date,
         from_value_date,
-        to_value_date
+        to_value_date,
+        _keep_nans=_keep_nans
     )
 
 
@@ -42,7 +45,8 @@ def edited(self,  # noqa: F811
            name,
            revision_date=None,
            from_value_date=None,
-           to_value_date=None):
+           to_value_date=None,
+           _keep_nans=False):
 
     source = self._findsourcefor(name)
     if source is None:
@@ -51,7 +55,8 @@ def edited(self,  # noqa: F811
         name,
         revision_date,
         from_value_date,
-        to_value_date
+        to_value_date,
+        _keep_nans
     )
 
 

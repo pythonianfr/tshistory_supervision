@@ -1,9 +1,12 @@
+import json
+
 import pandas as pd
 from psyl import lisp
 
 from flask import make_response
 
 from flask_restx import (
+    inputs,
     Resource,
     reqparse
 )
@@ -49,6 +52,10 @@ edited.add_argument(
     'horizon', type=str, default=None,
     help='override from/to_value_date'
 )
+edited.add_argument(
+    '_keep_nans', type=inputs.boolean, default=False,
+    help='keep erasure information'
+)
 
 
 class supervision_httpapi(httpapi):
@@ -85,11 +92,13 @@ class supervision_httpapi(httpapi):
                         api.abort(400, f'bad horizon expression for `{args.name}`')
                     fvd = horizon.past
                     tvd = horizon.future
+
                 series, markers = tsa.edited(
                     args.name,
                     revision_date=args.insertion_date,
                     from_value_date=fvd,
                     to_value_date=tvd,
+                    _keep_nans=args._keep_nans
                 )
                 metadata = tsa.metadata(args.name, all=True)
                 assert metadata is not None, f'series {args.name} has no metadata'
@@ -134,9 +143,11 @@ class supervision_httpclient(httpclient):
     def edited(self, name,
                revision_date=None,
                from_value_date=None,
-               to_value_date=None):
+               to_value_date=None,
+               _keep_nans=False):
         args = {
             'name': name,
+            '_keep_nans': json.dumps(_keep_nans),
             'format': 'tshpack',
         }
         if revision_date:

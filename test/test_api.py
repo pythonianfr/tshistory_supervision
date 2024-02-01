@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from tshistory.testutil import assert_df
@@ -36,6 +37,33 @@ def test_multi_source_handcrafted(tsx):
     assert_df("""
 2020-01-01    False
 2020-01-02    False
+2020-01-03    False
+""", marker)
+
+    edited = series.copy()
+    edited.iloc[1] = np.NaN
+    tsx.update('multi-local', edited, 'test', manual=True)
+
+    ts, marker = tsx.edited('multi-local', _keep_nans=True)
+    assert_df("""
+2020-01-01    1.0
+2020-01-02    NaN
+2020-01-03    3.0
+""", ts)
+    assert_df("""
+2020-01-01    False
+2020-01-02     True
+2020-01-03    False
+""", marker)
+
+    ts, marker = tsx.edited('multi-local', _keep_nans=False)
+    assert_df("""
+2020-01-01    1.0
+2020-01-03    3.0
+""", ts)
+    assert_df("""
+2020-01-01    False
+2020-01-02     True
 2020-01-03    False
 """, marker)
 
