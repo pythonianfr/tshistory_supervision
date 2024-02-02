@@ -8,7 +8,8 @@ import webtest
 from tshistory.schema import tsschema
 from tshistory import api
 from tshistory.testutil import make_tsx
-from tshistory.http import app
+from tshistory.http import app as appmaker
+from tshistory.http.util import nosecurity
 
 from tshistory_supervision.schema import supervision_schema
 from tshistory_supervision import http
@@ -89,7 +90,9 @@ def client(engine):
         'tsh',
         {'other': (DBURI, 'other')}
     )
-    wsgi = app.make_app(tsa, http.supervision_httpapi)
+    wsgi = nosecurity(
+        appmaker.make_app(tsa, http.supervision_httpapi)
+    )
     yield WebTester(wsgi)
 
 

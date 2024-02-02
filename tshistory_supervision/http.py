@@ -21,6 +21,7 @@ from tshistory.http.server import httpapi
 from tshistory.http.util import (
     enum,
     onerror,
+    required_roles,
     utcdt
 )
 from tshistory.http.horizon import OPERATORS
@@ -72,6 +73,7 @@ class supervision_httpapi(httpapi):
 
             @api.expect(edited)
             @onerror
+            @required_roles('admin', 'rw', 'ro')
             def get(self):
                 args = edited.parse_args()
                 if not tsa.exists(args.name):
