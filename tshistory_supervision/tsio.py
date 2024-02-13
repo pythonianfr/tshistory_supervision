@@ -1,10 +1,15 @@
 import pandas as pd
 import numpy as np
 
-from tshistory.util import tx, diff
+from tshistory.util import (
+    compatible_date,
+    infer_freq,
+    diff,
+    tx
+)
 from tshistory.tsio import timeseries as basets
 
-from tshistory_supervision import api  # trigger registration  # noqa: F401
+from tshistory_supervision import api  # noqa
 
 
 def join_index(ts1, ts2):
@@ -15,6 +20,66 @@ def join_index(ts1, ts2):
     if ts2 is None:
         return ts1.index
     return ts1.index.union(ts2.index)
+
+
+def extended(inferred_freq, ts, from_value_date, to_value_date):
+    if not inferred_freq or len(ts) < 3 :
+        return ts
+
+    first_index = ts.index[0]
+    last_index = ts.index[-1]
+    delta_interval = infer_freq(ts)[0]
+    tz_series = first_index.tz
+    to_value_date = compatible_date(tz_series, to_value_date)
+    from_value_date = compatible_date(tz_series, from_value_date)
+
+    if from_value_date is None and to_value_date is None:
+        new_index = pd.date_range(
+            start=first_index,
+            end=last_index,
+            freq=delta_interval
+        )
+        return ts.reindex(new_index)
+
+    if from_value_date is None:
+        new_index = pd.date_range(
+            start=first_index,
+            end=to_value_date,
+            freq=delta_interval
+        )
+        return ts.reindex(new_index)
+
+    if to_value_date is None:
+        new_index = pd.date_range(
+            start=last_index,
+            end=from_value_date,
+            freq=-delta_interval
+        ).sort_values()
+        return ts.reindex(new_index)
+
+    # we have to build the index in two parts
+    new_index = pd.date_range(
+        start=first_index,
+        end=to_value_date,
+        freq=delta_interval
+    )
+    complement = pd.date_range(
+        start=first_index,
+        end=from_value_date,
+        freq=-delta_interval
+    )
+    new_index = new_index.union(complement).sort_values()
+    return ts.reindex(new_index)
+
+
+def fill_markers(markers):
+    """ markers must remain pure boolean series.
+    When a point is created by the infer-freq option,
+    the associated markers should be set at False i.e.
+    this is not a manual edition
+    """
+    markers = markers.fillna(False)
+    return markers
 
 
 class timeseries(basets):
@@ -223,6 +288,7 @@ class timeseries(basets):
     @tx
     def get_ts_marker(self, cn, name, revision_date=None,
                       from_value_date=None, to_value_date=None,
+                      inferred_freq=False,
                       _keep_nans=False):
         table = self._series_to_tablename(cn, name)
         if table is None:
@@ -239,6 +305,12 @@ class timeseries(basets):
             # because of a revision_date
             return None, None
 
+        def finish(edited):
+            keep_nans = _keep_nans or inferred_freq
+            if not keep_nans:
+                return edited.dropna()
+            return edited
+
         supervision = self.supervision_status(cn, name)
         if supervision in ('unsupervised', 'handcrafted'):
             flags = pd.Series(
@@ -247,7 +319,23 @@ class timeseries(basets):
                 dtype=np.dtype('bool')
             )
             flags.name = name
-            return edited.dropna(), flags
+            edited = finish(edited)
+            return (
+                extended(
+                    inferred_freq,
+                    edited,
+                    from_value_date,
+                    to_value_date
+                ),
+                fill_markers(
+                    extended(
+                        inferred_freq,
+                        flags,
+                        from_value_date,
+                        to_value_date
+                    )
+                )
+            )
 
         upstreamtsh = self.upstream
         upstream = upstreamtsh.get(
@@ -272,6 +360,20 @@ class timeseries(basets):
             mask_manual[manual.index] = True
             mask_manual.name = name
 
-        if not _keep_nans:
-            edited = edited.dropna()
-        return edited, mask_manual
+        edited = finish(edited)
+        return (
+            extended(
+                inferred_freq,
+                edited,
+                from_value_date,
+                to_value_date
+            ),
+            fill_markers(
+                extended(
+                    inferred_freq,
+                    mask_manual,
+                    from_value_date,
+                    to_value_date
+                )
+            )
+        )

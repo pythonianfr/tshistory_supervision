@@ -14,6 +14,7 @@ def edited(self, name: str,
            revision_date: Optional[pd.Timestamp]=None,
            from_value_date: Optional[pd.Timestamp]=None,
            to_value_date: Optional[pd.Timestamp]=None,
+           inferred_freq: Optional[bool]=False,
            _keep_nans: bool=False) -> Tuple[pd.Series, pd.Series]:
     """
     Returns the base series and a second boolean series whose entries
@@ -28,6 +29,7 @@ def edited(self, name: str,
                 revision_date=revision_date,
                 from_value_date=from_value_date,
                 to_value_date=to_value_date,
+                inferred_freq=inferred_freq,
                 _keep_nans=_keep_nans
             )
 
@@ -46,6 +48,7 @@ def edited(self,  # noqa: F811
            revision_date=None,
            from_value_date=None,
            to_value_date=None,
+           inferred_freq=False,
            _keep_nans=False):
 
     source = self._findsourcefor(name)
@@ -56,6 +59,7 @@ def edited(self,  # noqa: F811
         revision_date,
         from_value_date,
         to_value_date,
+        inferred_freq,
         _keep_nans
     )
 

@@ -54,6 +54,10 @@ edited.add_argument(
     help='override from/to_value_date'
 )
 edited.add_argument(
+    'inferred_freq', type=bool, default=False,
+    help='re-index series on a inferred frequency'
+)
+edited.add_argument(
     '_keep_nans', type=inputs.boolean, default=False,
     help='keep erasure information'
 )
@@ -100,6 +104,7 @@ class supervision_httpapi(httpapi):
                     revision_date=args.insertion_date,
                     from_value_date=fvd,
                     to_value_date=tvd,
+                    inferred_freq=args.get('inferred_freq'),
                     _keep_nans=args._keep_nans
                 )
                 metadata = tsa.metadata(args.name, all=True)
@@ -146,6 +151,7 @@ class supervision_httpclient(httpclient):
                revision_date=None,
                from_value_date=None,
                to_value_date=None,
+               inferred_freq=False,
                _keep_nans=False):
         args = {
             'name': name,
@@ -158,6 +164,8 @@ class supervision_httpclient(httpclient):
             args['from_value_date'] = strft(from_value_date)
         if to_value_date:
             args['to_value_date'] = strft(to_value_date)
+        if inferred_freq:
+            args['inferred_freq'] = inferred_freq
         res = self.session.get(
             f'{self.uri}/series/supervision', params=args
         )
