@@ -58,6 +58,10 @@ edited.add_argument(
     help='re-index series on a inferred frequency'
 )
 edited.add_argument(
+    'tzone', type=str, default='UTC',
+    help='Convert tz-aware series into this time zone before sending'
+)
+edited.add_argument(
     '_keep_nans', type=inputs.boolean, default=False,
     help='keep erasure information'
 )
@@ -107,18 +111,21 @@ class supervision_httpapi(httpapi):
                     inferred_freq=args.get('inferred_freq'),
                     _keep_nans=args._keep_nans
                 )
-                metadata = tsa.metadata(args.name, all=True)
-                assert metadata is not None, f'series {args.name} has no metadata'
+                metadata = tsa.internal_metadata(args.name)
+                if metadata['tzaware'] and args.tzone.upper() != 'UTC':
+                    series.index = series.index.tz_convert(args.tzone)
+                    markers.index = markers.index.tz_convert(args.tzone)
 
                 if args.format == 'json':
                     if series is not None:
                         df = pd.DataFrame()
                         df['series'] = series
                         df['markers'] = markers
-                        response = make_response(
-                            df.to_json(orient='index',
-                                       date_format='iso')
-                        )
+                        out = {
+                            k.isoformat(): v
+                            for k, v in df.to_dict(orient='index').items()
+                        }
+                        response = make_response(out)
                     else:
                         response = make_response('null')
                     response.headers['Content-Type'] = 'text/json'

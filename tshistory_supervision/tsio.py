@@ -354,7 +354,8 @@ class timeseries(basets):
 
         mask_manual = pd.Series(
             [False] * len(unionindex),
-            index=unionindex
+            index=unionindex,
+            dtype='object'
         )
         if manual is not None:
             mask_manual[manual.index] = True

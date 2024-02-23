@@ -33,10 +33,10 @@ def test_supervision_json(client):
     res = client.get('/series/supervision?name=test-edited')
     df = pd.read_json(res.text, orient='index')
     assert_df("""
-                           series  markers
-2020-01-01 00:00:00+00:00       0    False
-2020-01-02 00:00:00+00:00       1    False
-2020-01-03 00:00:00+00:00      42     True
+                           markers  series
+2020-01-01 00:00:00+00:00    False       0
+2020-01-02 00:00:00+00:00    False       1
+2020-01-03 00:00:00+00:00     True      42
 """, df)
 
     res = client.get('/series/supervision?name=test-edited&format=tshpack')
@@ -86,7 +86,7 @@ def test_supervision(tsx):
 """, markers)
 
 
-def test_get_by_horizon(client):
+def test_edited_by_horizon(client):
     ts = genserie(utcdt(2023, 1, 1), 'D', 60)
     client.patch('/series/state', params={
         'name': 'horizon',
@@ -107,10 +107,10 @@ def test_get_by_horizon(client):
         )
     })
     assert res.json == {
-        '2023-01-30T00:00:00.000Z': {'markers': False, 'series': 29.0},
-        '2023-01-31T00:00:00.000Z': {'markers': False, 'series': 30.0},
-        '2023-02-01T00:00:00.000Z': {'markers': False, 'series': 31.0},
-        '2023-02-02T00:00:00.000Z': {'markers': False, 'series': 32.0}
+        '2023-01-30T00:00:00+00:00': {'markers': False, 'series': 29.0},
+        '2023-01-31T00:00:00+00:00': {'markers': False, 'series': 30.0},
+        '2023-02-01T00:00:00+00:00': {'markers': False, 'series': 31.0},
+        '2023-02-02T00:00:00+00:00': {'markers': False, 'series': 32.0}
     }
     df = pd.read_json(res.text, orient='index')
     ts = df['series']
@@ -150,3 +150,26 @@ def test_get_by_horizon(client):
 2023-02-01 00:00:00+00:00    False
 2023-02-02 00:00:00+00:00     True
 """, marker)
+
+
+def test_edited_with_timezone(client):
+    ts = genserie(utcdt(2023, 1, 1), 'D', 5)
+    client.patch('/series/state', params={
+        'name': 'withtz',
+        'series': util.tojson(ts),
+        'author': 'Babar',
+        'insertion_date': utcdt(2023, 1, 1),
+        'tzaware': util.tzaware_series(ts),
+        'supervision': json.dumps(False),
+    })
+    res = client.get('/series/supervision', params={
+        'name': 'withtz',
+        'tzone': 'Europe/Paris'
+    })
+    assert res.json == {
+        '2023-01-01T01:00:00+01:00': {'markers': False, 'series': 0.0},
+        '2023-01-02T01:00:00+01:00': {'markers': False, 'series': 1.0},
+        '2023-01-03T01:00:00+01:00': {'markers': False, 'series': 2.0},
+        '2023-01-04T01:00:00+01:00': {'markers': False, 'series': 3.0},
+        '2023-01-05T01:00:00+01:00': {'markers': False, 'series': 4.0}
+    }
