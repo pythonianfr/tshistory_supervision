@@ -34,10 +34,10 @@ def test_supervision_json(client):
     res = client.get('/series/supervision?name=test-edited')
     df = pd.read_json(res.text, orient='index')
     assert_df("""
-                           markers  series
-2020-01-01 00:00:00+00:00    False       0
-2020-01-02 00:00:00+00:00    False       1
-2020-01-03 00:00:00+00:00     True      42
+                           series  markers
+2020-01-01 00:00:00+00:00       0    False
+2020-01-02 00:00:00+00:00       1    False
+2020-01-03 00:00:00+00:00      42     True
 """, df)
 
     res = client.get('/series/supervision?name=test-edited&format=tshpack')
@@ -191,4 +191,4 @@ def test_edited_with_timezone(client):
         'tzone': 'Europe/Paris',
         '_keep_nans': json.dumps(True)
     })
-    assert 'NaN' in res.text  # oops, we'd like a nul !
+    assert 'null' in res.text

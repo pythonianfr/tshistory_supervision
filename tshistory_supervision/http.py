@@ -1,5 +1,4 @@
-import json
-
+import simplejson as json
 import pandas as pd
 from psyl import lisp
 
@@ -125,7 +124,9 @@ class supervision_httpapi(httpapi):
                             k.isoformat(): v
                             for k, v in df.to_dict(orient='index').items()
                         }
-                        response = make_response(out)
+                        response = make_response(
+                            json.dumps(out, ignore_nan=True)
+                        )
                     else:
                         response = make_response('null')
                     response.headers['Content-Type'] = 'text/json'

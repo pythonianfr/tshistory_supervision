@@ -12,6 +12,7 @@ setup(name='tshistory_supervision',
 
       packages=['tshistory_supervision'],
       install_requires=[
+          'simplejson',
           'tshistory >= 0.18.0'
       ],
       entry_points={
