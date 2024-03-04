@@ -1,5 +1,6 @@
 import json
 
+import numpy as np
 import pandas as pd
 
 from tshistory import util
@@ -173,3 +174,21 @@ def test_edited_with_timezone(client):
         '2023-01-04T01:00:00+01:00': {'markers': False, 'series': 3.0},
         '2023-01-05T01:00:00+01:00': {'markers': False, 'series': 4.0}
     }
+
+    # put a nan
+    ts[2] = np.nan
+    client.patch('/series/state', params={
+        'name': 'withtz',
+        'series': util.tojson(ts),
+        'author': 'Babar',
+        'insertion_date': utcdt(2023, 1, 2),
+        'tzaware': util.tzaware_series(ts),
+        'supervision': json.dumps(False),
+    })
+
+    res = client.get('/series/supervision', params={
+        'name': 'withtz',
+        'tzone': 'Europe/Paris',
+        '_keep_nans': json.dumps(True)
+    })
+    assert 'NaN' in res.text  # oops, we'd like a nul !
