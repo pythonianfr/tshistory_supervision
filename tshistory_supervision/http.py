@@ -53,7 +53,7 @@ edited.add_argument(
     help='override from/to_value_date'
 )
 edited.add_argument(
-    'inferred_freq', type=bool, default=False,
+    'inferred_freq', type=inputs.boolean, default=False,
     help='re-index series on a inferred frequency'
 )
 edited.add_argument(

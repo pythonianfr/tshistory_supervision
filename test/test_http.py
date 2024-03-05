@@ -237,6 +237,4 @@ def test_infer_freq_http(client):
         'inferred_freq': json.dumps(False),
     })
     series, markers = util.unpack_many_series(res.body)
-    # There should be only 5 values, like the call without
-    # the "inferred_freq" params
-    assert 6 == len(series) == len(markers)
+    assert 5 == len(series) == len(markers)
