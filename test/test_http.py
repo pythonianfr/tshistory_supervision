@@ -192,3 +192,51 @@ def test_edited_with_timezone(client):
         '_keep_nans': json.dumps(True)
     })
     assert 'null' in res.text
+
+
+def test_infer_freq_http(client):
+    ts = pd.Series(
+        [1, 2, 3, 4, 6],
+        index=[
+            pd.Timestamp('2024-01-01', tz='UTC'),
+            pd.Timestamp('2024-01-02', tz='UTC'),
+            pd.Timestamp('2024-01-03', tz='UTC'),
+            pd.Timestamp('2024-01-04', tz='UTC'),
+            # hole in here
+            pd.Timestamp('2024-01-06', tz='UTC'),
+        ]
+    )
+    client.patch('/series/state', params={
+        'name': 'series_holes_tz_aware',
+        'series': util.tojson(ts),
+        'author': 'Babar',
+        'tzaware': util.tzaware_series(ts),
+        'supervision': json.dumps(False),
+    })
+    res = client.get('/series/supervision', params={
+        'name': 'series_holes_tz_aware',
+        'tzone': 'Europe/Paris',
+        'format': 'tshpack',
+    })
+    series, markers = util.unpack_many_series(res.body)
+    assert 5 == len(series) == len(markers)
+
+    res = client.get('/series/supervision', params={
+        'name': 'series_holes_tz_aware',
+        'tzone': 'Europe/Paris',
+        'format': 'tshpack',
+        'inferred_freq': json.dumps(True),
+    })
+    series, markers = util.unpack_many_series(res.body)
+    assert 6 == len(series) == len(markers)
+
+    res = client.get('/series/supervision', params={
+        'name': 'series_holes_tz_aware',
+        'tzone': 'Europe/Paris',
+        'format': 'tshpack',
+        'inferred_freq': json.dumps(False),
+    })
+    series, markers = util.unpack_many_series(res.body)
+    # There should be only 5 values, like the call without
+    # the "inferred_freq" params
+    assert 6 == len(series) == len(markers)
