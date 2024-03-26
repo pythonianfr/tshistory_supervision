@@ -5,7 +5,8 @@ from tshistory.util import (
     compatible_date,
     infer_freq,
     diff,
-    tx
+    tx,
+    with_inferred_freq
 )
 from tshistory.tsio import timeseries as basets
 
@@ -23,53 +24,10 @@ def join_index(ts1, ts2):
 
 
 def extended(inferred_freq, ts, from_value_date, to_value_date):
-    if not inferred_freq or len(ts) < 3 :
+    if not inferred_freq:
         return ts
 
-    first_index = ts.index[0]
-    last_index = ts.index[-1]
-    delta_interval = infer_freq(ts)[0]
-    tz_series = first_index.tz
-    to_value_date = compatible_date(tz_series, to_value_date)
-    from_value_date = compatible_date(tz_series, from_value_date)
-
-    if from_value_date is None and to_value_date is None:
-        new_index = pd.date_range(
-            start=first_index,
-            end=last_index,
-            freq=delta_interval
-        )
-        return ts.reindex(new_index)
-
-    if from_value_date is None:
-        new_index = pd.date_range(
-            start=first_index,
-            end=to_value_date,
-            freq=delta_interval
-        )
-        return ts.reindex(new_index)
-
-    if to_value_date is None:
-        new_index = pd.date_range(
-            start=last_index,
-            end=from_value_date,
-            freq=-delta_interval
-        ).sort_values()
-        return ts.reindex(new_index)
-
-    # we have to build the index in two parts
-    new_index = pd.date_range(
-        start=first_index,
-        end=to_value_date,
-        freq=delta_interval
-    )
-    complement = pd.date_range(
-        start=first_index,
-        end=from_value_date,
-        freq=-delta_interval
-    )
-    new_index = new_index.union(complement).sort_values()
-    return ts.reindex(new_index)
+    return with_inferred_freq(ts, from_value_date, to_value_date)
 
 
 def fill_markers(markers):
