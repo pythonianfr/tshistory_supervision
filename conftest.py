@@ -98,6 +98,7 @@ def client(engine):
 
 def _initschema(engine):
     supervision_schema('tsh').create(engine)
+    supervision_schema('remote').create(engine)
 
 
 tsx = make_tsx(
@@ -106,5 +107,6 @@ tsx = make_tsx(
     timeseries,
     http.supervision_httpapi,
     http.supervision_httpclient,
+    sources={'remote': (DBURI, 'remote')},
     with_http_bridge=with_http_bridge
 )

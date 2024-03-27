@@ -38,6 +38,7 @@ def edited(self, name: str,
         revision_date,
         from_value_date,
         to_value_date,
+        inferred_freq=inferred_freq,
         _keep_nans=_keep_nans
     )
 

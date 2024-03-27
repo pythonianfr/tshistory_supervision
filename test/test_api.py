@@ -332,6 +332,51 @@ def test_infer_freq(tsx):
     assert len(markers) == 1
 
 
+def test_remote_infer_freq(tsx, engine):
+    ts = pd.Series(
+        [1, 2, 3, 4, 6],
+        index=[
+            pd.Timestamp('2024-01-01'),
+            pd.Timestamp('2024-01-02'),
+            pd.Timestamp('2024-01-03'),
+            pd.Timestamp('2024-01-04'),
+            pd.Timestamp('2024-01-06'),
+        ]
+    )
+
+    from tshistory.tsio import timeseries
+    rtsh = timeseries('remote')
+    rtsh.update(
+        engine,
+        ts,
+        'remote_series_with_holes',
+        author='Babar'
+    )
+
+    ts, markers = tsx.edited('remote_series_with_holes')
+    assert len(ts) == 5
+
+    ts, markers = tsx.edited('remote_series_with_holes', inferred_freq=True)
+
+    assert_df("""
+2024-01-01    1.0
+2024-01-02    2.0
+2024-01-03    3.0
+2024-01-04    4.0
+2024-01-05    NaN
+2024-01-06    6.0
+""", ts)
+
+    assert_df("""
+2024-01-01    False
+2024-01-02    False
+2024-01-03    False
+2024-01-04    False
+2024-01-05    False
+2024-01-06    False
+""", markers)
+
+
 def test_infer_freq_tz(tsx):
     """Since we build a pseudo index based
     both on request bounds and the series index
