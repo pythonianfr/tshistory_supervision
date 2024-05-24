@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 
 from tshistory.util import (
-    compatible_date,
-    infer_freq,
     diff,
     tx,
     with_inferred_freq
@@ -88,7 +86,7 @@ class timeseries(basets):
 
     def __init__(self, *a, **kw):
         super().__init__(*a, **kw)
-        self.upstream = basets(namespace='{}-upstream'.format(self.namespace))
+        self.upstream = basets(namespace=f'{self.namespace}-upstream')
 
     def supervision_status(self, cn, name):
         meta = self.internal_metadata(cn, name)
