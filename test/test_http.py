@@ -1,3 +1,4 @@
+import io
 import json
 
 import numpy as np
@@ -21,7 +22,7 @@ def test_supervision_json(client):
         'tzaware': util.tzaware_series(series)
     })
 
-    series[-1] = 42
+    series.iloc[-1] = 42
     client.patch('/series/state', params={
         'name': 'test-edited',
         'series': util.tojson(series),
@@ -32,7 +33,7 @@ def test_supervision_json(client):
     })
 
     res = client.get('/series/supervision?name=test-edited')
-    df = pd.read_json(res.text, orient='index')
+    df = pd.read_json(io.StringIO(res.text), orient='index')
     assert_df("""
                            series  markers
 2020-01-01 00:00:00+00:00       0    False
@@ -69,7 +70,7 @@ def test_supervision(tsx):
     series = genserie(utcdt(2020, 1, 1), 'D', 3)
     tsx.update('test-supervision', series, 'Babar')
 
-    series[-1] = 42
+    series.iloc[-1] = 42
     tsx.update('test-supervision', series, 'Babar', manual=True)
 
     ts, markers = tsx.edited('test-supervision')
@@ -113,9 +114,9 @@ def test_edited_by_horizon(client):
         '2023-02-01T00:00:00+00:00': {'markers': False, 'series': 31.0},
         '2023-02-02T00:00:00+00:00': {'markers': False, 'series': 32.0}
     }
-    df = pd.read_json(res.text, orient='index')
+    df = pd.read_json(io.StringIO(res.text), orient='index')
     ts = df['series']
-    ts[-1] = 42
+    ts.iloc[-1] = 42
 
     client.patch('/series/state', params={
         'name': 'horizon',
@@ -176,7 +177,7 @@ def test_edited_with_timezone(client):
     }
 
     # put a nan
-    ts[2] = np.nan
+    ts.iloc[2] = np.nan
     client.patch('/series/state', params={
         'name': 'withtz',
         'series': util.tojson(ts),

@@ -7,22 +7,9 @@ import numpy as np
 from tshistory.util import _set_cache, empty_series
 from tshistory.testutil import (
     assert_df,
+    genserie,
     utcdt
 )
-
-
-def genserie(start, freq, repeat, initval=None, tz=None, name=None):
-    if initval is None:
-        values = range(repeat)
-    else:
-        values = initval * repeat
-    return pd.Series(values,
-                     name=name,
-                     index=pd.date_range(start=start,
-                                         freq=freq,
-                                         periods=repeat,
-                                         tz=tz))
-
 
 
 def test_rename(engine, tsh):
@@ -574,10 +561,10 @@ def test_series_dtype(engine, tsh):
 def test_serie_deletion(engine, tsh):
 
     def testit(tsh):
-        ts = genserie(datetime(2018, 1, 10), 'H', 10)
+        ts = genserie(datetime(2018, 1, 10), 'h', 10)
         tsh.update(engine, ts, 'keepme', 'Babar')
         tsh.update(engine, ts, 'deleteme', 'Celeste')
-        ts = genserie(datetime(2018, 1, 12), 'H', 10)
+        ts = genserie(datetime(2018, 1, 12), 'h', 10)
         tsh.update(engine, ts, 'keepme', 'Babar')
         tsh.update(engine, ts, 'deleteme', 'Celeste')
 
