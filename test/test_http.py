@@ -183,6 +183,7 @@ def test_edited_with_timezone(client):
         'series': util.tojson(ts),
         'author': 'Babar',
         'insertion_date': utcdt(2023, 1, 2),
+        'keepnans': json.dumps(True),
         'tzaware': util.tzaware_series(ts),
         'supervision': json.dumps(False),
     })

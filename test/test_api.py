@@ -42,7 +42,7 @@ def test_multi_source_handcrafted(tsx):
 
     edited = series.copy()
     edited.iloc[1] = np.NaN
-    tsx.update('multi-local', edited, 'test', manual=True)
+    tsx.update('multi-local', edited, 'test', manual=True, keepnans=True)
 
     ts, marker = tsx.edited('multi-local', _keep_nans=True)
     assert_df("""

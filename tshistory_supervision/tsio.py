@@ -97,7 +97,9 @@ class timeseries(basets):
     @tx
     def __supervise__(self, cn, ts, name, author,
                       metadata=None,
-                      insertion_date=None, manual=False,
+                      insertion_date=None,
+                      keepnans=False,
+                      manual=False,
                       __supermethod__=None,
                       __upmethod__=None):
 
@@ -111,7 +113,8 @@ class timeseries(basets):
             series_diff = __supermethod__(
                 cn, ts, name, author,
                 metadata=metadata,
-                insertion_date=insertion_date
+                insertion_date=insertion_date,
+                keepnans=keepnans
             )
             if series_diff is None or not len(series_diff):
                 return series_diff
@@ -133,7 +136,8 @@ class timeseries(basets):
                 __upmethod__(
                     cn, current, name, author,
                     metadata=metadata,
-                    insertion_date=insertion_date
+                    insertion_date=insertion_date,
+                    keepnans=keepnans
                 )
                 # update supervision status
                 meta = {'supervision_status': 'supervised'}
@@ -143,7 +147,8 @@ class timeseries(basets):
             return __supermethod__(
                 cn, ts, name, author,
                 metadata=metadata,
-                insertion_date=insertion_date
+                insertion_date=insertion_date,
+                keepnans=keepnans
             )
 
         assert supervision_status in ('supervised', 'handcrafted')
@@ -154,7 +159,8 @@ class timeseries(basets):
             series_diff = __upmethod__(
                 cn, ts, name, author,
                 metadata=metadata,
-                insertion_date=insertion_date
+                insertion_date=insertion_date,
+                keepnans=keepnans
             )
 
             if supervision_status == 'handcrafted':
@@ -169,18 +175,22 @@ class timeseries(basets):
         a = __supermethod__(
             cn, series_diff, name, author,
             metadata=metadata,
-            insertion_date=insertion_date
+            insertion_date=insertion_date,
+            keepnans=keepnans
         )
         return a
 
     @tx
     def update(self, cn, ts, name, author,
                metadata=None,
-               insertion_date=None, manual=False):
+               insertion_date=None,
+               keepnans=False,
+               manual=False):
         return self.__supervise__(
             cn, ts, name, author,
             metadata=metadata,
             insertion_date=insertion_date,
+            keepnans=keepnans,
             manual=manual,
             __supermethod__=super().update,
             __upmethod__=self.upstream.update
@@ -188,12 +198,15 @@ class timeseries(basets):
 
     @tx
     def replace(self, cn, ts, name, author,
-               metadata=None,
-               insertion_date=None, manual=False):
+                metadata=None,
+                insertion_date=None,
+                keepnans=False,
+                manual=False):
         return self.__supervise__(
             cn, ts, name, author,
             metadata=metadata,
             insertion_date=insertion_date,
+            keepnans=keepnans,
             manual=manual,
             __supermethod__=super().replace,
             __upmethod__=self.upstream.replace
