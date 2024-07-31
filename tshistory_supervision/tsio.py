@@ -218,9 +218,9 @@ class timeseries(basets):
         self.upstream.delete(cn, seriename)
 
     @tx
-    def rename(self, cn, oldname, newname):
-        super().rename(cn, oldname, newname)
-        self.upstream.rename(cn, oldname, newname)
+    def rename(self, cn, oldname, newname, propagate=True):
+        super().rename(cn, oldname, newname, propagate=propagate)
+        self.upstream.rename(cn, oldname, newname, propagate=propagate)
 
     @tx
     def strip(self, cn, name, csid):
