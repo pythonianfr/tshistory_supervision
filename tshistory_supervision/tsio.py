@@ -108,6 +108,8 @@ class timeseries(basets):
                 metadata = {}
             metadata['edited'] = True
 
+        keepnans = keepnans or manual
+
         if not self.exists(cn, name):
             # initial insert
             series_diff = __supermethod__(
