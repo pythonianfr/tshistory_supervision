@@ -23,7 +23,6 @@ from tshistory.http.util import (
     required_roles,
     utcdt
 )
-from tshistory.http.horizon import OPERATORS
 
 
 base = reqparse.RequestParser()
@@ -89,24 +88,11 @@ class supervision_httpapi(httpapi):
                     if tsa.formula(args.name):
                         api.abort(404, f'`{args.name}` is a formula')
 
-                # handle the horizon parameter
-                fvd = args.from_value_date
-                tvd = args.to_value_date
-                hz = args.get('horizon')
-                if hz:
-                    env = lisp.Env(OPERATORS)
-                    try:
-                        horizon = lisp.evaluate(hz, env)
-                    except:
-                        api.abort(400, f'bad horizon expression for `{args.name}`')
-                    fvd = horizon.past
-                    tvd = horizon.future
-
                 series, markers = tsa.edited(
                     args.name,
                     revision_date=args.insertion_date,
-                    from_value_date=fvd,
-                    to_value_date=tvd,
+                    from_value_date=args.from_value_date,
+                    to_value_date=args.to_value_date,
                     inferred_freq=args.get('inferred_freq'),
                     _keep_nans=args._keep_nans
                 )
