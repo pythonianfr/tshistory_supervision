@@ -1,6 +1,5 @@
 import simplejson as json
 import pandas as pd
-from psyl import lisp
 
 from flask import make_response
 
